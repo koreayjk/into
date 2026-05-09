@@ -996,12 +996,53 @@ textarea { resize: vertical; min-height: 160px; }
     <div class="modal-footer">
       <button class="btn-danger" onclick="deleteRecord()">🗑 삭제</button>
       <button class="btn-pdf" onclick="exportSinglePDF()">📄 PDF</button>
+      <button class="btn-pdf" style="background:var(--green-bg);color:var(--green);border-color:#86efac;" onclick="openEditModal()">✏️ 수정</button>
       <button class="btn-close-modal" onclick="closeModalDirect()">닫기</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModalOverlay" onclick="closeEditModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✏️ 상담 기록 수정</h3>
+      <button class="modal-close" onclick="closeEditModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px;">
+      <div class="form-grid" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="fg"><label class="lbl">학생 이름</label><input type="text" id="editName"></div>
+          <div class="fg"><label class="lbl">연락처</label><input type="text" id="editPhone"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          <div class="fg"><label class="lbl">상담 일자</label><input type="date" id="editDate"></div>
+          <div class="fg"><label class="lbl">상담자</label><select id="editConsultant"></select></div>
+          <div class="fg"><label class="lbl">유입 경로</label>
+            <select id="editChannel" onchange="onEditChannelChange()"></select>
+            <select id="editChannelSub" style="display:none;margin-top:6px;"></select>
+          </div>
+        </div>
+        <div class="fg"><label class="lbl">상담 내용 요약</label><textarea id="editNotes" style="min-height:100px;"></textarea></div>
+        <div class="fg"><label class="lbl">결정 여부</label>
+          <div class="decision-grid" id="editDecisionGroup">
+            <button class="dec-btn" onclick="selectEditDecision(this,'yes')">✅ 진행 결정</button>
+            <button class="dec-btn" onclick="selectEditDecision(this,'thinking')">🤔 검토 중</button>
+            <button class="dec-btn" onclick="selectEditDecision(this,'pending')">⏳ 재연락 예정</button>
+            <button class="dec-btn" onclick="selectEditDecision(this,'no')">❌ 미진행</button>
+          </div>
+        </div>
+        <div class="fg"><label class="lbl">팔로업 메모</label><input type="text" id="editFollowup"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close-modal" onclick="closeEditModalDirect()">취소</button>
+      <button class="btn-sky" style="padding:8px 20px;border-radius:7px;font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;" onclick="saveEdit()">💾 저장</button>
+    </div>
+  </div>
+</div>
 
 <!-- BOTTOM TAB BAR (mobile only) -->
 <div class="bottom-tab-bar">
@@ -1346,6 +1387,128 @@ textarea { resize: vertical; min-height: 160px; }
     <div class="ft"><span>INTO유학CENTER · Student Consultation Chart</span><span>${today}</span></div>
     </body></html>`);
   }
+
+  // ── 수정 기능 ──────────────────────────────────────
+  let editDecision = '';
+
+  function openEditModal() {
+    if (currentModalIndex < 0) return;
+    const r = records[currentModalIndex];
+    const admin = getAdminData();
+
+    // populate selects
+    const ce = document.getElementById('editConsultant');
+    ce.innerHTML = '<option value="">선택</option>' +
+      admin.consultants.map(c => `<option value="${c}">${c}</option>`).join('') +
+      '<option value="기타">기타</option>';
+
+    const ch = document.getElementById('editChannel');
+    ch.innerHTML = '<option value="">선택</option>' +
+      admin.channels.map(c => `<option value="${c}">${c}</option>`).join('') +
+      '<option value="KCPA">KCPA</option><option value="학원">학원</option><option value="기타">기타</option>';
+
+    // fill values
+    document.getElementById('editName').value = r.name || '';
+    document.getElementById('editPhone').value = r.phone || '';
+    document.getElementById('editDate').value = r.date || '';
+    document.getElementById('editConsultant').value = r.consultant || '';
+    document.getElementById('editFollowup').value = r.followup || '';
+    document.getElementById('editNotes').value = r.notes || '';
+
+    // channel - handle sub
+    const sub = document.getElementById('editChannelSub');
+    sub.style.display = 'none'; sub.innerHTML = '';
+    if (r.channel && r.channel.includes(' - ')) {
+      const parts = r.channel.split(' - ');
+      document.getElementById('editChannel').value = parts[0];
+      onEditChannelChange();
+      setTimeout(() => { sub.value = r.channel; }, 50);
+    } else {
+      document.getElementById('editChannel').value = r.channel || '';
+    }
+
+    // decision
+    editDecision = r.decision || '';
+    document.querySelectorAll('#editDecisionGroup .dec-btn').forEach(b => b.className = 'dec-btn');
+    const selBtn = document.querySelector(`#editDecisionGroup .dec-btn[onclick*="'${editDecision}'"]`);
+    if (selBtn) selBtn.classList.add('sel-' + editDecision);
+
+    document.getElementById('editModalOverlay').classList.add('open');
+  }
+
+  function onEditChannelChange() {
+    const val = document.getElementById('editChannel').value;
+    const sub = document.getElementById('editChannelSub');
+    const admin = getAdminData();
+    if (val === 'KCPA') {
+      sub.style.display = 'block';
+      sub.innerHTML = '<option value="">KCPA 멤버 선택</option>' +
+        admin.kcpa.map(m => `<option value="KCPA - ${m}">${m}</option>`).join('');
+    } else if (val === '학원') {
+      sub.style.display = 'block';
+      sub.innerHTML = '<option value="">학원 멤버 선택</option>' +
+        admin.academy.map(m => `<option value="학원 - ${m}">${m}</option>`).join('');
+    } else {
+      sub.style.display = 'none'; sub.innerHTML = '';
+    }
+  }
+
+  function selectEditDecision(el, val) {
+    editDecision = val;
+    document.querySelectorAll('#editDecisionGroup .dec-btn').forEach(b => b.className = 'dec-btn');
+    el.classList.add('sel-' + val);
+  }
+
+  function getEditChannelValue() {
+    const main = document.getElementById('editChannel').value;
+    const sub = document.getElementById('editChannelSub');
+    if ((main === 'KCPA' || main === '학원') && sub.style.display !== 'none' && sub.value) return sub.value;
+    return main;
+  }
+
+  async function saveEdit() {
+    if (currentModalIndex < 0) return;
+    const r = records[currentModalIndex];
+    const decisionLabel = { yes:'진행 결정', no:'미진행', pending:'재연락 예정', thinking:'검토 중', '':'미정' };
+
+    const updated = {
+      ...r,
+      name: document.getElementById('editName').value.trim(),
+      phone: document.getElementById('editPhone').value.trim(),
+      date: document.getElementById('editDate').value,
+      consultant: document.getElementById('editConsultant').value,
+      channel: getEditChannelValue(),
+      notes: document.getElementById('editNotes').value.trim(),
+      followup: document.getElementById('editFollowup').value.trim(),
+      decision: editDecision
+    };
+
+    if (!updated.name) { showToast('⚠️ 이름을 입력해주세요.'); return; }
+
+    // 로컬 업데이트
+    records[currentModalIndex] = updated;
+    localStorage.setItem('intoConsultations', JSON.stringify(records));
+    closeEditModalDirect();
+    updateStats();
+    renderRecords();
+    showToast('💾 수정 중...');
+
+    // Sheets 업데이트
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', ...updated, decision: decisionLabel[editDecision || ''] })
+      });
+      showToast('✅ 수정 완료!');
+    } catch {
+      showToast('⚠️ 로컬 수정 완료. Sheets 업데이트 실패.');
+    }
+  }
+
+  function closeEditModal(e) { if (e.target === document.getElementById('editModalOverlay')) closeEditModalDirect(); }
+  function closeEditModalDirect() { document.getElementById('editModalOverlay').classList.remove('open'); }
+  // ────────────────────────────────────────────────────
 
   function showToast(msg) {
     const t = document.getElementById('toast');
