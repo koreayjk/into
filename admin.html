@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTO유학CENTER — 어드민</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f5f0e8;
+    --accent: #c8732a;
+    --accent-light: #f0c99a;
+    --teal: #2a7c8a;
+    --teal-light: #d4eff3;
+    --line: #d4c9b5;
+    --muted: #8a7f72;
+    --green: #2d7a4f;
+    --green-light: #d4eddf;
+    --red-light: #fde8e8;
+    --red: #b94040;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #e8e2d6;
+    min-height: 100vh;
+    padding: 32px 16px;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(200,115,42,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(42,124,138,0.06) 0%, transparent 50%);
+  }
+
+  /* Login screen */
+  .login-screen {
+    max-width: 380px;
+    margin: 80px auto;
+  }
+
+  .login-card {
+    background: var(--paper);
+    border-radius: 16px;
+    border: 1.5px solid var(--line);
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(26,26,46,0.12);
+  }
+
+  .login-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 28px 28px 20px;
+    text-align: center;
+  }
+
+  .login-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+  }
+
+  .login-header h1 span { color: var(--accent-light); }
+
+  .login-header p {
+    font-size: 12px;
+    opacity: 0.6;
+    margin-top: 4px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .login-body { padding: 28px; }
+
+  .login-body label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .login-body input {
+    width: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    letter-spacing: 8px;
+    text-align: center;
+    color: var(--ink);
+    background: white;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .login-body input:focus { border-color: var(--teal); }
+
+  .login-error {
+    color: var(--red);
+    font-size: 13px;
+    text-align: center;
+    margin-top: 10px;
+    min-height: 20px;
+  }
+
+  /* Main admin */
+  .admin-screen { display: none; }
+
+  .page-header {
+    max-width: 800px;
+    margin: 0 auto 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+  }
+
+  .logo-block h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--ink);
+  }
+
+  .logo-block h1 span { color: var(--accent); }
+  .logo-block p { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+
+  .container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+  .card {
+    background: var(--paper);
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(26,26,46,0.08);
+  }
+
+  .card-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-header h2 { font-family: 'DM Serif Display', serif; font-size: 17px; font-weight: 400; }
+  .card-body { padding: 20px 24px; }
+
+  /* Item list */
+  .item-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+
+  .item-row .item-name { flex: 1; font-size: 14px; color: var(--ink); font-weight: 500; }
+  .item-row .item-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    background: var(--teal-light);
+    color: var(--teal);
+    font-weight: 500;
+  }
+
+  .btn-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+
+  .btn-delete:hover { background: var(--red-light); color: var(--red); }
+
+  /* Sub-items (KCPA, 학원) */
+  .sub-section {
+    margin-left: 0;
+    padding: 12px 16px;
+    background: #f9f5ee;
+    border-radius: 8px;
+    border: 1px dashed var(--line);
+    margin-top: 4px;
+  }
+
+  .sub-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .sub-item-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+
+  .sub-item-row:last-child { margin-bottom: 0; }
+  .sub-item-row .item-name { flex: 1; font-size: 13px; color: var(--ink); }
+
+  /* Add row */
+  .add-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .add-row input {
+    flex: 1;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: white;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .add-row input:focus { border-color: var(--teal); }
+
+  .btn {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #a85e1f; }
+  .btn-teal { background: var(--teal); color: white; }
+  .btn-teal:hover { background: #1f6070; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--ink); color: var(--ink); }
+  .btn-outline:hover { background: var(--ink); color: var(--paper); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  .divider { border: none; border-top: 1px dashed var(--line); margin: 16px 0; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transform: translateY(60px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    border-left: 4px solid var(--accent);
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  .back-link {
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.15s;
+  }
+
+  .back-link:hover { color: var(--ink); }
+
+  .empty-note { font-size: 13px; color: var(--muted); font-style: italic; padding: 8px 0; }
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>INTO<span>유학</span>CENTER</h1>
+      <p>Admin Panel</p>
+    </div>
+    <div class="login-body">
+      <label>PIN 번호 입력</label>
+      <input type="password" id="pinInput" maxlength="4" placeholder="••••" oninput="checkPin(this.value)">
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Screen -->
+<div class="admin-screen" id="adminScreen">
+
+  <div class="page-header">
+    <div class="logo-block">
+      <h1>INTO<span>유학</span>CENTER</h1>
+      <p>관리자 설정</p>
+    </div>
+    <a href="index.html" class="back-link">← 상담 차트로 돌아가기</a>
+  </div>
+
+  <div class="container">
+
+    <!-- 상담자 관리 -->
+    <div class="card">
+      <div class="card-header">
+        <h2>👤 상담자 관리</h2>
+      </div>
+      <div class="card-body">
+        <div class="item-list" id="consultantList"></div>
+        <div class="add-row">
+          <input type="text" id="newConsultant" placeholder="새 상담자 이름 입력..." onkeydown="if(event.key==='Enter') addConsultant()">
+          <button class="btn btn-primary" onclick="addConsultant()">+ 추가</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 유입 경로 관리 -->
+    <div class="card">
+      <div class="card-header">
+        <h2>📌 유입 경로 관리</h2>
+      </div>
+      <div class="card-body">
+
+        <!-- 일반 경로 -->
+        <div style="font-size:11px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); margin-bottom:10px;">일반 경로</div>
+        <div class="item-list" id="channelList"></div>
+        <div class="add-row">
+          <input type="text" id="newChannel" placeholder="새 유입 경로 입력..." onkeydown="if(event.key==='Enter') addChannel()">
+          <button class="btn btn-primary" onclick="addChannel()">+ 추가</button>
+        </div>
+
+        <hr class="divider">
+
+        <!-- KCPA -->
+        <div class="sub-section">
+          <div class="sub-section-title">📋 KCPA 하위 멤버</div>
+          <div id="kcpaList"></div>
+          <div class="add-row" style="margin-top:8px;">
+            <input type="text" id="newKcpa" placeholder="KCPA 멤버 이름..." onkeydown="if(event.key==='Enter') addKcpa()">
+            <button class="btn btn-teal btn-sm" onclick="addKcpa()">+ 추가</button>
+          </div>
+        </div>
+
+        <hr class="divider">
+
+        <!-- 학원 -->
+        <div class="sub-section">
+          <div class="sub-section-title">🏫 학원 하위 멤버</div>
+          <div id="academyList"></div>
+          <div class="add-row" style="margin-top:8px;">
+            <input type="text" id="newAcademy" placeholder="학원 멤버 이름..." onkeydown="if(event.key==='Enter') addAcademy()">
+            <button class="btn btn-teal btn-sm" onclick="addAcademy()">+ 추가</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 저장 -->
+    <div style="display:flex; justify-content:flex-end; gap:12px;">
+      <a href="index.html" class="btn btn-outline">취소</a>
+      <button class="btn btn-teal" onclick="saveAll()">💾 변경사항 저장</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PIN = '2414';
+
+  // Default data
+  const DEFAULT = {
+    consultants: ['Moses 목사님', '스태프 A', '스태프 B'],
+    channels: ['유튜브', '인스타그램', '카카오톡', '네이버 검색', '지인 소개', '교회 연결', '페이스북'],
+    kcpa: ['KCPA 멤버1', 'KCPA 멤버2', 'KCPA 멤버3', 'KCPA 멤버4', 'KCPA 멤버5'],
+    academy: ['학원1', '학원2', '학원3', '학원4', '학원5']
+  };
+
+  let data = {
+    consultants: JSON.parse(localStorage.getItem('admin_consultants') || 'null') || [...DEFAULT.consultants],
+    channels: JSON.parse(localStorage.getItem('admin_channels') || 'null') || [...DEFAULT.channels],
+    kcpa: JSON.parse(localStorage.getItem('admin_kcpa') || 'null') || [...DEFAULT.kcpa],
+    academy: JSON.parse(localStorage.getItem('admin_academy') || 'null') || [...DEFAULT.academy]
+  };
+
+  function checkPin(val) {
+    if (val.length === 4) {
+      if (val === PIN) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminScreen').style.display = 'block';
+        renderAll();
+      } else {
+        document.getElementById('loginError').textContent = '❌ PIN 번호가 틀렸습니다.';
+        document.getElementById('pinInput').value = '';
+        setTimeout(() => document.getElementById('loginError').textContent = '', 2000);
+      }
+    }
+  }
+
+  function renderList(containerId, arr, deleteFunc) {
+    const el = document.getElementById(containerId);
+    if (arr.length === 0) {
+      el.innerHTML = '<div class="empty-note">항목이 없습니다.</div>';
+      return;
+    }
+    el.innerHTML = arr.map((item, i) => `
+      <div class="${containerId.includes('kcpa') || containerId.includes('academy') || containerId.includes('Academy') ? 'sub-item-row' : 'item-row'}">
+        <span class="item-name">${item}</span>
+        <button class="btn-delete" onclick="${deleteFunc}(${i})" title="삭제">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function renderAll() {
+    renderList('consultantList', data.consultants, 'deleteConsultant');
+    renderList('channelList', data.channels, 'deleteChannel');
+    renderList('kcpaList', data.kcpa, 'deleteKcpa');
+    renderList('academyList', data.academy, 'deleteAcademy');
+  }
+
+  // Consultants
+  function addConsultant() {
+    const val = document.getElementById('newConsultant').value.trim();
+    if (!val) return;
+    data.consultants.push(val);
+    document.getElementById('newConsultant').value = '';
+    renderAll();
+  }
+
+  function deleteConsultant(i) {
+    data.consultants.splice(i, 1);
+    renderAll();
+  }
+
+  // Channels
+  function addChannel() {
+    const val = document.getElementById('newChannel').value.trim();
+    if (!val) return;
+    data.channels.push(val);
+    document.getElementById('newChannel').value = '';
+    renderAll();
+  }
+
+  function deleteChannel(i) {
+    data.channels.splice(i, 1);
+    renderAll();
+  }
+
+  // KCPA
+  function addKcpa() {
+    const val = document.getElementById('newKcpa').value.trim();
+    if (!val) return;
+    data.kcpa.push(val);
+    document.getElementById('newKcpa').value = '';
+    renderAll();
+  }
+
+  function deleteKcpa(i) {
+    data.kcpa.splice(i, 1);
+    renderAll();
+  }
+
+  // Academy
+  function addAcademy() {
+    const val = document.getElementById('newAcademy').value.trim();
+    if (!val) return;
+    data.academy.push(val);
+    document.getElementById('newAcademy').value = '';
+    renderAll();
+  }
+
+  function deleteAcademy(i) {
+    data.academy.splice(i, 1);
+    renderAll();
+  }
+
+  function saveAll() {
+    localStorage.setItem('admin_consultants', JSON.stringify(data.consultants));
+    localStorage.setItem('admin_channels', JSON.stringify(data.channels));
+    localStorage.setItem('admin_kcpa', JSON.stringify(data.kcpa));
+    localStorage.setItem('admin_academy', JSON.stringify(data.academy));
+    showToast('✅ 저장되었습니다!');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>
