@@ -272,6 +272,7 @@ body {
 
 .form-grid { display: flex; flex-direction: column; gap: 14px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
 .fg {
   display: flex;
@@ -316,8 +317,13 @@ textarea { resize: vertical; min-height: 80px; }
 /* Decision buttons */
 .decision-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   gap: 7px;
+}
+
+@media (max-width: 640px) {
+  .decision-grid { grid-template-columns: 1fr 1fr; }
+  .form-row-3 { grid-template-columns: 1fr 1fr; }
 }
 
 .dec-btn {
@@ -390,6 +396,29 @@ textarea { resize: vertical; min-height: 80px; }
 
 .form-panel.hidden { display: none; }
 .records-panel.hidden { display: none; }
+
+/* 신규 상담 등록 뷰: 폼이 전체 너비 차지 */
+.records-panel.hidden ~ .form-panel,
+.form-panel.expanded {
+  width: 100%;
+  max-width: 100%;
+}
+
+.form-panel.full-width {
+  width: 100%;
+  border-right: none;
+}
+
+.form-body.full-width-body {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.form-footer.full-width-footer {
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
 
 .records-toolbar {
   padding: 14px 20px;
@@ -866,7 +895,7 @@ textarea { resize: vertical; min-height: 80px; }
             </div>
           </div>
 
-          <div class="form-row">
+          <div class="form-row-3">
             <div class="fg">
               <label class="lbl">상담 일자</label>
               <input type="date" id="date">
@@ -875,12 +904,11 @@ textarea { resize: vertical; min-height: 80px; }
               <label class="lbl">상담자</label>
               <select id="consultant"></select>
             </div>
-          </div>
-
-          <div class="fg">
-            <label class="lbl">유입 경로</label>
-            <select id="channel" onchange="onChannelChange()"></select>
-            <select id="channelSub" style="display:none; margin-top:6px;"></select>
+            <div class="fg">
+              <label class="lbl">유입 경로</label>
+              <select id="channel" onchange="onChannelChange()"></select>
+              <select id="channelSub" style="display:none; margin-top:6px;"></select>
+            </div>
           </div>
 
           <div class="fg">
@@ -1291,7 +1319,6 @@ textarea { resize: vertical; min-height: 80px; }
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     if (!fromTab) el.classList.add('active');
     else {
-      // sync sidebar
       const sideItems = document.querySelectorAll('.nav-item');
       if (v === 'form' && sideItems[0]) sideItems[0].classList.add('active');
       if (v === 'records' && sideItems[1]) sideItems[1].classList.add('active');
@@ -1312,20 +1339,40 @@ textarea { resize: vertical; min-height: 80px; }
 
     const formPanel = document.querySelector('.form-panel');
     const recordsPanel = document.querySelector('.records-panel');
+    const formBody = document.querySelector('.form-body');
+    const formFooter = document.querySelector('.form-footer');
 
     if (v === 'form') {
       formPanel.classList.remove('hidden');
       recordsPanel.classList.add('hidden');
-      document.querySelector('.topbar-title').textContent = '신규 상담 등록';
+      // 폼을 전체 너비로
+      formPanel.style.width = '100%';
+      formPanel.style.borderRight = 'none';
+      if (formBody) { formBody.style.maxWidth = '700px'; formBody.style.margin = '0 auto'; }
+      if (formFooter) { formFooter.style.maxWidth = '700px'; formFooter.style.margin = '0 auto'; formFooter.style.width = '100%'; }
+      document.getElementById('topbarTitle').textContent = '신규 상담 등록';
     } else {
       formPanel.classList.add('hidden');
       recordsPanel.classList.remove('hidden');
-      document.querySelector('.topbar-title').textContent = '상담 기록 목록';
+      // 폼 너비 초기화
+      formPanel.style.width = '';
+      formPanel.style.borderRight = '';
+      if (formBody) { formBody.style.maxWidth = ''; formBody.style.margin = ''; }
+      if (formFooter) { formFooter.style.maxWidth = ''; formFooter.style.margin = ''; formFooter.style.width = ''; }
+      document.getElementById('topbarTitle').textContent = '상담 기록 목록';
     }
   }
 
   updateStats();
   renderRecords();
+
+  // 초기 로드: 폼 전체 너비 적용
+  const _fp = document.querySelector('.form-panel');
+  const _fb = document.querySelector('.form-body');
+  const _ff = document.querySelector('.form-footer');
+  if (_fp) { _fp.style.width = '100%'; _fp.style.borderRight = 'none'; }
+  if (_fb) { _fb.style.maxWidth = '700px'; _fb.style.margin = '0 auto'; }
+  if (_ff) { _ff.style.maxWidth = '700px'; _ff.style.margin = '0 auto'; _ff.style.width = '100%'; }
 </script>
 </body>
 </html>
