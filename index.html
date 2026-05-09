@@ -54,21 +54,16 @@ body {
 }
 
 .sidebar-logo {
-  padding: 24px 20px 20px;
+  padding: 20px 20px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
-.sidebar-logo h1 {
-  font-size: 18px;
-  font-weight: 900;
-  color: var(--white);
-  letter-spacing: -0.5px;
-  line-height: 1;
-}
-
-.sidebar-logo h1 em {
-  color: var(--sky);
-  font-style: normal;
+.sidebar-logo img {
+  width: 100%;
+  max-width: 170px;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .sidebar-logo p {
@@ -76,7 +71,7 @@ body {
   color: rgba(255,255,255,0.35);
   letter-spacing: 1.8px;
   text-transform: uppercase;
-  margin-top: 5px;
+  margin-top: 8px;
 }
 
 .sidebar-nav {
@@ -393,6 +388,9 @@ textarea { resize: vertical; min-height: 80px; }
   overflow: hidden;
 }
 
+.form-panel.hidden { display: none; }
+.records-panel.hidden { display: none; }
+
 .records-toolbar {
   padding: 14px 20px;
   background: var(--white);
@@ -702,14 +700,95 @@ textarea { resize: vertical; min-height: 80px; }
 .av-7 { background: #db2777; }
 .av-8 { background: #4f46e5; }
 
+/* ── BOTTOM TAB BAR (mobile) ── */
+.bottom-tab-bar {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .sidebar { display: none; }
   .form-panel { width: 320px; }
 }
 
 @media (max-width: 640px) {
-  .content { flex-direction: column; }
-  .form-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border); max-height: 50vh; }
+  body { flex-direction: column; overflow: auto; }
+
+  .main { overflow: auto; }
+
+  .topbar { padding: 0 16px; }
+  .topbar-title { font-size: 13px; }
+  .topbar-actions .btn span { display: none; }
+
+  .content {
+    flex-direction: column;
+    overflow: visible;
+    flex: 1;
+  }
+
+  .form-panel {
+    width: 100%;
+    border-right: none;
+    border-bottom: none;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-panel.hidden { display: none; }
+
+  .records-panel {
+    flex: 1;
+    overflow: visible;
+  }
+
+  .records-list {
+    overflow: visible;
+    padding-bottom: 80px;
+  }
+
+  .form-body {
+    padding-bottom: 80px;
+  }
+
+  /* Bottom tab bar */
+  .bottom-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    z-index: 50;
+    box-shadow: 0 -4px 16px rgba(15,31,61,0.08);
+  }
+
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    gap: 4px;
+    text-decoration: none;
+    border: none;
+    background: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .tab-item .tab-icon { font-size: 20px; line-height: 1; }
+  .tab-item.active { color: var(--navy); }
+  .tab-item.active .tab-icon-wrap {
+    background: var(--sky-light);
+    border-radius: 10px;
+    padding: 4px 16px;
+  }
 }
 </style>
 </head>
@@ -718,16 +797,16 @@ textarea { resize: vertical; min-height: 80px; }
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <h1>INTO<em>유학</em>CENTER</h1>
-    <p>Consultation Chart</p>
+    <img src="intologo2.png" alt="인투유학CENTER" style="width:100%; max-width:170px; height:auto; display:block; object-fit:contain;">
+    <p style="margin-top:8px;">Consultation Chart</p>
   </div>
 
   <nav class="sidebar-nav">
     <div class="nav-label">메뉴</div>
-    <div class="nav-item active" onclick="showView('form')">
+    <div class="nav-item active" onclick="showView('form', this)">
       <span class="icon">📋</span> 신규 상담 등록
     </div>
-    <div class="nav-item" onclick="showView('records')">
+    <div class="nav-item" onclick="showView('records', this)">
       <span class="icon">📊</span> 상담 기록 목록
     </div>
     <div class="nav-label">설정</div>
@@ -754,7 +833,7 @@ textarea { resize: vertical; min-height: 80px; }
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
-      <div class="topbar-title">상담 차트</div>
+      <div class="topbar-title" id="topbarTitle">신규 상담 등록</div>
       <div class="topbar-badge" id="topBadge">0건</div>
     </div>
     <div class="topbar-actions">
@@ -834,7 +913,7 @@ textarea { resize: vertical; min-height: 80px; }
     </div>
 
     <!-- RECORDS PANEL -->
-    <div class="records-panel">
+    <div class="records-panel hidden">
       <div class="records-toolbar">
         <div class="search-wrap">
           <span class="search-icon">🔍</span>
@@ -873,6 +952,28 @@ textarea { resize: vertical; min-height: 80px; }
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- BOTTOM TAB BAR (mobile only) -->
+<div class="bottom-tab-bar">
+  <button class="tab-item active" id="tabForm" onclick="showView('form', this, true)">
+    <div class="tab-icon-wrap">
+      <div class="tab-icon">📋</div>
+    </div>
+    <span>신규 등록</span>
+  </button>
+  <button class="tab-item" id="tabRecords" onclick="showView('records', this, true)">
+    <div class="tab-icon-wrap">
+      <div class="tab-icon">📊</div>
+    </div>
+    <span>기록 목록</span>
+  </button>
+  <a href="admin.html" class="tab-item">
+    <div class="tab-icon-wrap">
+      <div class="tab-icon">⚙️</div>
+    </div>
+    <span>관리자</span>
+  </a>
+</div>
 
 <script>
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwx0tolAa5REyEgJyrAN8A801DfUcaNIaPYME5w7mw_iM0t-On2aJhMD95eTcDY_qNioA/exec';
@@ -1185,9 +1286,42 @@ textarea { resize: vertical; min-height: 80px; }
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
-  function showView(v) {
+  function showView(v, el, fromTab) {
+    // Sync sidebar nav
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    if (!fromTab) el.classList.add('active');
+    else {
+      // sync sidebar
+      const sideItems = document.querySelectorAll('.nav-item');
+      if (v === 'form' && sideItems[0]) sideItems[0].classList.add('active');
+      if (v === 'records' && sideItems[1]) sideItems[1].classList.add('active');
+    }
+
+    // Sync bottom tabs
+    document.querySelectorAll('.tab-item').forEach(t => {
+      t.classList.remove('active');
+      const wrap = t.querySelector('.tab-icon-wrap');
+      if (wrap) { wrap.style.background = ''; wrap.style.borderRadius = ''; wrap.style.padding = ''; }
+    });
+    const tabEl = v === 'form' ? document.getElementById('tabForm') : document.getElementById('tabRecords');
+    if (tabEl) {
+      tabEl.classList.add('active');
+      const wrap = tabEl.querySelector('.tab-icon-wrap');
+      if (wrap) { wrap.style.background = 'var(--sky-light)'; wrap.style.borderRadius = '10px'; wrap.style.padding = '4px 16px'; }
+    }
+
+    const formPanel = document.querySelector('.form-panel');
+    const recordsPanel = document.querySelector('.records-panel');
+
+    if (v === 'form') {
+      formPanel.classList.remove('hidden');
+      recordsPanel.classList.add('hidden');
+      document.querySelector('.topbar-title').textContent = '신규 상담 등록';
+    } else {
+      formPanel.classList.add('hidden');
+      recordsPanel.classList.remove('hidden');
+      document.querySelector('.topbar-title').textContent = '상담 기록 목록';
+    }
   }
 
   updateStats();
