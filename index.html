@@ -191,6 +191,13 @@ body {
   font-weight: 600;
 }
 
+.topbar-logo {
+  display: none;
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
 .topbar-actions {
   display: flex;
   gap: 8px;
@@ -747,6 +754,7 @@ textarea { resize: vertical; min-height: 80px; }
   .topbar { padding: 0 16px; }
   .topbar-title { font-size: 13px; }
   .topbar-actions .btn span { display: none; }
+  .topbar-logo { display: block; }
 
   .content {
     flex-direction: column;
@@ -862,6 +870,7 @@ textarea { resize: vertical; min-height: 80px; }
   <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
+      <img src="intologo1.png" alt="인투유학CENTER" class="topbar-logo">
       <div class="topbar-title" id="topbarTitle">신규 상담 등록</div>
       <div class="topbar-badge" id="topBadge">0건</div>
     </div>
