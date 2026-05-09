@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -10,270 +9,270 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-–navy: #0f1f3d;
-–navy2: #162847;
-–navy3: #1e3560;
-–sky: #38bdf8;
-–sky-light: #e0f2fe;
-–sky-dark: #0369a1;
-–white: #ffffff;
-–bg: #f0f4f8;
-–surface: #ffffff;
-–border: #e2e8f0;
-–text: #0f172a;
-–muted: #64748b;
-–green: #16a34a;
-–green-bg: #dcfce7;
-–amber: #d97706;
-–amber-bg: #fef3c7;
-–blue: #2563eb;
-–blue-bg: #dbeafe;
-–red: #dc2626;
-–red-bg: #fee2e2;
-–sidebar-w: 220px;
+  --navy: #0f1f3d;
+  --navy2: #162847;
+  --navy3: #1e3560;
+  --sky: #38bdf8;
+  --sky-light: #e0f2fe;
+  --sky-dark: #0369a1;
+  --white: #ffffff;
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  --green: #16a34a;
+  --green-bg: #dcfce7;
+  --amber: #d97706;
+  --amber-bg: #fef3c7;
+  --blue: #2563eb;
+  --blue-bg: #dbeafe;
+  --red: #dc2626;
+  --red-bg: #fee2e2;
+  --sidebar-w: 220px;
 }
 
 html, body { height: 100%; }
 
 body {
-font-family: ‘Noto Sans KR’, sans-serif;
-background: var(–bg);
-display: flex;
-height: 100vh;
-overflow: hidden;
-color: var(–text);
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  color: var(--text);
 }
 
 /* ── SIDEBAR ── */
 .sidebar {
-width: var(–sidebar-w);
-background: var(–navy);
-display: flex;
-flex-direction: column;
-flex-shrink: 0;
-overflow: hidden;
+  width: var(--sidebar-w);
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .sidebar-logo {
-padding: 20px 20px 16px;
-border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 
 .sidebar-logo img {
-width: 100%;
-max-width: 170px;
-height: auto;
-display: block;
-object-fit: contain;
+  width: 100%;
+  max-width: 170px;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .sidebar-logo p {
-font-size: 9px;
-color: rgba(255,255,255,0.35);
-letter-spacing: 1.8px;
-text-transform: uppercase;
-margin-top: 8px;
+  font-size: 9px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  margin-top: 8px;
 }
 
 .sidebar-nav {
-padding: 16px 12px;
-flex: 1;
+  padding: 16px 12px;
+  flex: 1;
 }
 
 .nav-label {
-font-size: 9px;
-color: rgba(255,255,255,0.25);
-letter-spacing: 1.5px;
-text-transform: uppercase;
-padding: 0 8px;
-margin-bottom: 6px;
-margin-top: 16px;
+  font-size: 9px;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 0 8px;
+  margin-bottom: 6px;
+  margin-top: 16px;
 }
 
 .nav-label:first-child { margin-top: 0; }
 
 .nav-item {
-display: flex;
-align-items: center;
-gap: 10px;
-padding: 9px 10px;
-border-radius: 8px;
-font-size: 13px;
-color: rgba(255,255,255,0.55);
-cursor: pointer;
-transition: all 0.15s;
-font-weight: 500;
-margin-bottom: 2px;
-text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 500;
+  margin-bottom: 2px;
+  text-decoration: none;
 }
 
 .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
-.nav-item.active { background: rgba(56,189,248,0.15); color: var(–sky); }
+.nav-item.active { background: rgba(56,189,248,0.15); color: var(--sky); }
 .nav-item .icon { font-size: 15px; width: 18px; text-align: center; }
 
 .sidebar-stats {
-padding: 16px 12px;
-border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 16px 12px;
+  border-top: 1px solid rgba(255,255,255,0.07);
 }
 
 .stat-row {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 8px;
-margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .stat-box {
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,255,255,0.08);
-border-radius: 8px;
-padding: 10px 10px 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px 10px 8px;
 }
 
 .stat-box .n {
-font-size: 20px;
-font-weight: 700;
-color: var(–white);
-line-height: 1;
-font-family: ‘DM Mono’, monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+  font-family: 'DM Mono', monospace;
 }
 
 .stat-box .l {
-font-size: 9px;
-color: rgba(255,255,255,0.35);
-margin-top: 3px;
-text-transform: uppercase;
-letter-spacing: 0.5px;
+  font-size: 9px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .stat-box.s-green .n { color: #4ade80; }
 .stat-box.s-amber .n { color: #fbbf24; }
-.stat-box.s-sky .n { color: var(–sky); }
+.stat-box.s-sky .n { color: var(--sky); }
 .stat-box.s-red .n { color: #f87171; }
 
 /* ── MAIN AREA ── */
 .main {
-flex: 1;
-display: flex;
-flex-direction: column;
-overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Topbar */
 .topbar {
-background: var(–white);
-border-bottom: 1px solid var(–border);
-padding: 0 24px;
-height: 56px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-flex-shrink: 0;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .topbar-left {
-display: flex;
-align-items: center;
-gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .topbar-title {
-font-size: 14px;
-font-weight: 700;
-color: var(–text);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .topbar-badge {
-font-size: 10px;
-background: var(–sky-light);
-color: var(–sky-dark);
-padding: 2px 9px;
-border-radius: 20px;
-font-weight: 600;
+  font-size: 10px;
+  background: var(--sky-light);
+  color: var(--sky-dark);
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-weight: 600;
 }
 
 .topbar-logo {
-display: none;
-height: 28px;
-width: auto;
-object-fit: contain;
+  display: none;
+  height: 28px;
+  width: auto;
+  object-fit: contain;
 }
 
 .topbar-actions {
-display: flex;
-gap: 8px;
+  display: flex;
+  gap: 8px;
 }
 
 .btn {
-font-family: ‘Noto Sans KR’, sans-serif;
-font-size: 12px;
-font-weight: 600;
-padding: 7px 14px;
-border-radius: 7px;
-cursor: pointer;
-transition: all 0.15s;
-border: none;
-display: flex;
-align-items: center;
-gap: 5px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .btn-ghost {
-background: transparent;
-border: 1.5px solid var(–border);
-color: var(–muted);
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
 }
-.btn-ghost:hover { border-color: var(–text); color: var(–text); }
+.btn-ghost:hover { border-color: var(--text); color: var(--text); }
 
 .btn-navy {
-background: var(–navy);
-color: white;
+  background: var(--navy);
+  color: white;
 }
-.btn-navy:hover { background: var(–navy3); }
+.btn-navy:hover { background: var(--navy3); }
 
 .btn-sky {
-background: var(–sky);
-color: var(–navy);
+  background: var(--sky);
+  color: var(--navy);
 }
 .btn-sky:hover { background: #0ea5e9; }
 
 /* Content split */
 .content {
-flex: 1;
-display: flex;
-overflow: hidden;
+  flex: 1;
+  display: flex;
+  overflow: hidden;
 }
 
 /* ── FORM PANEL ── */
 .form-panel {
-width: 380px;
-flex-shrink: 0;
-background: var(–white);
-border-right: 1px solid var(–border);
-overflow-y: auto;
-display: flex;
-flex-direction: column;
+  width: 380px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-panel-header {
-padding: 20px 22px 16px;
-border-bottom: 1px solid var(–border);
-background: var(–navy);
-position: sticky;
-top: 0;
-z-index: 2;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--navy);
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .form-panel-header h2 {
-font-size: 14px;
-font-weight: 700;
-color: white;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
 }
 
 .form-panel-header p {
-font-size: 11px;
-color: rgba(255,255,255,0.45);
-margin-top: 2px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 2px;
 }
 
 .form-body { padding: 18px 22px; flex: 1; }
@@ -283,133 +282,133 @@ margin-top: 2px;
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 
 .fg {
-display: flex;
-flex-direction: column;
-gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .fg.full { grid-column: 1/-1; }
 
 label.lbl {
-font-size: 10px;
-font-weight: 700;
-letter-spacing: 1.2px;
-text-transform: uppercase;
-color: var(–muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
-input[type=“text”],
-input[type=“date”],
-input[type=“date”]::-webkit-date-and-time-value,
+input[type="text"],
+input[type="date"],
+input[type="date"]::-webkit-date-and-time-value,
 select,
 textarea {
-font-family: ‘Noto Sans KR’, sans-serif;
-font-size: 13px;
-color: var(–text);
-background: var(–bg);
-border: 1.5px solid var(–border);
-border-radius: 8px;
-padding: 9px 12px;
-outline: none;
-transition: all 0.15s;
-width: 100%;
-min-width: 0;
-box-sizing: border-box;
--webkit-appearance: none;
-appearance: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  outline: none;
+  transition: all 0.15s;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-input[type=“date”] {
-text-align: center;
+input[type="date"] {
+  text-align: center;
 }
 
 input:focus, select:focus, textarea:focus {
-background: white;
-border-color: var(–sky);
-box-shadow: 0 0 0 3px rgba(56,189,248,0.12);
+  background: white;
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.12);
 }
 
 textarea { resize: vertical; min-height: 80px; }
 
 /* Decision buttons */
 .decision-grid {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
-gap: 7px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
 }
 
 @media (max-width: 640px) {
-.decision-grid { grid-template-columns: 1fr 1fr; }
-.form-row-3 { grid-template-columns: 1fr; }
-.form-row { grid-template-columns: 1fr; }
+  .decision-grid { grid-template-columns: 1fr 1fr; }
+  .form-row-3 { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
 }
 
 .dec-btn {
-font-family: ‘Noto Sans KR’, sans-serif;
-font-size: 12px;
-font-weight: 500;
-padding: 9px 8px;
-border-radius: 8px;
-border: 1.5px solid var(–border);
-background: var(–bg);
-color: var(–muted);
-cursor: pointer;
-transition: all 0.15s;
-text-align: center;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 9px 8px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
 }
 
-.dec-btn:hover { border-color: #94a3b8; color: var(–text); }
-.dec-btn.sel-yes { background: var(–green-bg); border-color: var(–green); color: var(–green); font-weight: 700; }
-.dec-btn.sel-thinking { background: var(–amber-bg); border-color: var(–amber); color: var(–amber); font-weight: 700; }
-.dec-btn.sel-pending { background: var(–blue-bg); border-color: var(–blue); color: var(–blue); font-weight: 700; }
-.dec-btn.sel-no { background: var(–red-bg); border-color: var(–red); color: var(–red); font-weight: 700; }
+.dec-btn:hover { border-color: #94a3b8; color: var(--text); }
+.dec-btn.sel-yes { background: var(--green-bg); border-color: var(--green); color: var(--green); font-weight: 700; }
+.dec-btn.sel-thinking { background: var(--amber-bg); border-color: var(--amber); color: var(--amber); font-weight: 700; }
+.dec-btn.sel-pending { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); font-weight: 700; }
+.dec-btn.sel-no { background: var(--red-bg); border-color: var(--red); color: var(--red); font-weight: 700; }
 
-.divider { border: none; border-top: 1px dashed var(–border); margin: 4px 0; }
+.divider { border: none; border-top: 1px dashed var(--border); margin: 4px 0; }
 
 .form-footer {
-display: flex;
-gap: 8px;
-padding: 14px 22px;
-border-top: 1px solid var(–border);
-background: white;
-position: sticky;
-bottom: 0;
+  display: flex;
+  gap: 8px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: white;
+  position: sticky;
+  bottom: 0;
 }
 
 .btn-save {
-flex: 1;
-font-family: ‘Noto Sans KR’, sans-serif;
-font-size: 13px;
-font-weight: 700;
-padding: 11px;
-border-radius: 8px;
-background: var(–navy);
-color: white;
-border: none;
-cursor: pointer;
-transition: background 0.15s;
+  flex: 1;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 11px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
 }
-.btn-save:hover { background: var(–navy3); }
+.btn-save:hover { background: var(--navy3); }
 
 .btn-reset {
-font-family: ‘Noto Sans KR’, sans-serif;
-font-size: 12px;
-font-weight: 500;
-padding: 11px 16px;
-border-radius: 8px;
-background: var(–bg);
-color: var(–muted);
-border: 1.5px solid var(–border);
-cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 11px 16px;
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+  border: 1.5px solid var(--border);
+  cursor: pointer;
 }
-.btn-reset:hover { color: var(–text); border-color: #94a3b8; }
+.btn-reset:hover { color: var(--text); border-color: #94a3b8; }
 
 /* ── RECORDS PANEL ── */
 .records-panel {
-flex: 1;
-display: flex;
-flex-direction: column;
-overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .form-panel.hidden { display: none; }
@@ -418,165 +417,165 @@ overflow: hidden;
 /* 신규 상담 등록 뷰: 폼이 전체 너비 차지 */
 .records-panel.hidden ~ .form-panel,
 .form-panel.expanded {
-width: 100%;
-max-width: 100%;
+  width: 100%;
+  max-width: 100%;
 }
 
 .form-panel.full-width {
-width: 100%;
-border-right: none;
+  width: 100%;
+  border-right: none;
 }
 
 .form-body.full-width-body {
-max-width: 720px;
-margin: 0 auto;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .form-footer.full-width-footer {
-max-width: 720px;
-margin: 0 auto;
-width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .records-toolbar {
-padding: 14px 20px;
-background: var(–white);
-border-bottom: 1px solid var(–border);
-display: flex;
-gap: 10px;
-align-items: center;
-flex-shrink: 0;
+  padding: 14px 20px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .search-wrap {
-flex: 1;
-position: relative;
+  flex: 1;
+  position: relative;
 }
 
 .search-wrap input {
-width: 100%;
-padding: 8px 12px 8px 34px;
-font-size: 13px;
-border: 1.5px solid var(–border);
-border-radius: 8px;
-background: var(–bg);
-color: var(–text);
-font-family: ‘Noto Sans KR’, sans-serif;
-outline: none;
-transition: all 0.15s;
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  font-size: 13px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  outline: none;
+  transition: all 0.15s;
 }
 
 .search-wrap input:focus {
-background: white;
-border-color: var(–sky);
-box-shadow: 0 0 0 3px rgba(56,189,248,0.12);
+  background: white;
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.12);
 }
 
 .search-icon {
-position: absolute;
-left: 10px;
-top: 50%;
-transform: translateY(-50%);
-color: var(–muted);
-font-size: 14px;
-pointer-events: none;
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 14px;
+  pointer-events: none;
 }
 
 .filter-select {
-font-family: ‘Noto Sans KR’, sans-serif;
-font-size: 12px;
-font-weight: 600;
-padding: 8px 12px;
-border: 1.5px solid var(–border);
-border-radius: 8px;
-background: var(–bg);
-color: var(–text);
-outline: none;
-cursor: pointer;
-transition: all 0.15s;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s;
 }
-.filter-select:focus { border-color: var(–sky); }
+.filter-select:focus { border-color: var(--sky); }
 
 .records-count {
-font-size: 11px;
-font-weight: 700;
-background: var(–navy);
-color: white;
-padding: 4px 12px;
-border-radius: 20px;
-font-family: ‘DM Mono’, monospace;
-white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--navy);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
 }
 
 .records-list {
-flex: 1;
-overflow-y: auto;
-padding: 16px 20px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
 }
 
 /* Record item */
 .record-item {
-background: var(–white);
-border: 1.5px solid var(–border);
-border-radius: 10px;
-padding: 14px 16px;
-margin-bottom: 8px;
-display: flex;
-align-items: center;
-gap: 14px;
-cursor: pointer;
-transition: all 0.15s;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
 .record-item:hover {
-border-color: var(–sky);
-box-shadow: 0 2px 12px rgba(56,189,248,0.1);
-transform: translateY(-1px);
+  border-color: var(--sky);
+  box-shadow: 0 2px 12px rgba(56,189,248,0.1);
+  transform: translateY(-1px);
 }
 
 .record-avatar {
-width: 38px;
-height: 38px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 15px;
-font-weight: 700;
-flex-shrink: 0;
-color: white;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: white;
 }
 
 .record-body { flex: 1; min-width: 0; }
 
 .record-name {
-font-size: 14px;
-font-weight: 700;
-color: var(–text);
-display: flex;
-align-items: center;
-gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .record-phone {
-font-size: 12px;
-color: var(–muted);
-font-weight: 400;
-font-family: ‘DM Mono’, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 400;
+  font-family: 'DM Mono', monospace;
 }
 
 .record-tags {
-display: flex;
-flex-wrap: wrap;
-gap: 5px;
-margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
 }
 
 .rtag {
-font-size: 10px;
-padding: 2px 8px;
-border-radius: 20px;
-font-weight: 500;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
 }
 
 .rtag-date { background: #fef9c3; color: #854d0e; }
@@ -584,151 +583,151 @@ font-weight: 500;
 .rtag-co { background: #f3f0ff; color: #5b21b6; }
 
 .record-note {
-font-size: 12px;
-color: var(–muted);
-margin-top: 5px;
-line-height: 1.5;
-overflow: hidden;
-display: -webkit-box;
--webkit-line-clamp: 1;
--webkit-box-orient: vertical;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .record-right {
-display: flex;
-flex-direction: column;
-align-items: flex-end;
-gap: 6px;
-flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .record-num {
-font-size: 10px;
-color: var(–muted);
-font-family: ‘DM Mono’, monospace;
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
 }
 
 .dec-badge {
-font-size: 11px;
-font-weight: 700;
-padding: 4px 10px;
-border-radius: 7px;
-white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 7px;
+  white-space: nowrap;
 }
 
-.db-yes { background: var(–green-bg); color: var(–green); }
-.db-thinking { background: var(–amber-bg); color: var(–amber); }
-.db-pending { background: var(–blue-bg); color: var(–blue); }
-.db-no { background: var(–red-bg); color: var(–red); }
-.db- { background: #f1f5f9; color: var(–muted); }
+.db-yes { background: var(--green-bg); color: var(--green); }
+.db-thinking { background: var(--amber-bg); color: var(--amber); }
+.db-pending { background: var(--blue-bg); color: var(--blue); }
+.db-no { background: var(--red-bg); color: var(--red); }
+.db- { background: #f1f5f9; color: var(--muted); }
 
 /* Empty state */
 .empty-state {
-text-align: center;
-padding: 60px 20px;
-color: var(–muted);
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
 }
 .empty-state .ei { font-size: 40px; margin-bottom: 12px; }
 .empty-state p { font-size: 14px; }
 
 /* ── MODAL ── */
 .modal-overlay {
-position: fixed;
-inset: 0;
-background: rgba(15,31,61,0.55);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 100;
-padding: 20px;
-backdrop-filter: blur(4px);
+  position: fixed;
+  inset: 0;
+  background: rgba(15,31,61,0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  backdrop-filter: blur(4px);
 }
 
 .modal-overlay.open { display: flex; }
 
 .modal {
-background: var(–white);
-border-radius: 14px;
-max-width: 520px;
-width: 100%;
-max-height: 85vh;
-overflow-y: auto;
-box-shadow: 0 24px 64px rgba(15,31,61,0.3);
+  background: var(--white);
+  border-radius: 14px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(15,31,61,0.3);
 }
 
 .modal-header {
-background: var(–navy);
-color: white;
-padding: 18px 24px;
-border-radius: 14px 14px 0 0;
-display: flex;
-justify-content: space-between;
-align-items: center;
+  background: var(--navy);
+  color: white;
+  padding: 18px 24px;
+  border-radius: 14px 14px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .modal-header h3 { font-size: 16px; font-weight: 700; }
 
 .modal-close {
-background: rgba(255,255,255,0.1);
-border: none;
-color: white;
-width: 28px;
-height: 28px;
-border-radius: 6px;
-font-size: 14px;
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: background 0.15s;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
 }
 .modal-close:hover { background: rgba(255,255,255,0.2); }
 
 .modal-body { padding: 20px 24px; }
 
 .detail-row {
-display: grid;
-grid-template-columns: 110px 1fr;
-padding: 10px 0;
-border-bottom: 1px solid var(–border);
-font-size: 13px;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
 }
 .detail-row:last-child { border-bottom: none; }
-.detail-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(–muted); padding-top: 1px; }
-.detail-value { color: var(–text); line-height: 1.6; }
+.detail-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding-top: 1px; }
+.detail-value { color: var(--text); line-height: 1.6; }
 
 .modal-footer {
-padding: 14px 24px;
-border-top: 1px solid var(–border);
-display: flex;
-gap: 8px;
-justify-content: flex-end;
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
-.btn-danger { background: var(–red-bg); color: var(–red); border: 1.5px solid #fca5a5; font-family: ‘Noto Sans KR’, sans-serif; font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 7px; cursor: pointer; transition: all 0.15s; }
-.btn-danger:hover { background: var(–red); color: white; }
-.btn-pdf { background: var(–sky-light); color: var(–sky-dark); border: 1.5px solid #bae6fd; font-family: ‘Noto Sans KR’, sans-serif; font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 7px; cursor: pointer; transition: all 0.15s; }
-.btn-pdf:hover { background: var(–sky); color: white; }
-.btn-close-modal { background: var(–navy); color: white; border: none; font-family: ‘Noto Sans KR’, sans-serif; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 7px; cursor: pointer; transition: background 0.15s; }
-.btn-close-modal:hover { background: var(–navy3); }
+.btn-danger { background: var(--red-bg); color: var(--red); border: 1.5px solid #fca5a5; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 7px; cursor: pointer; transition: all 0.15s; }
+.btn-danger:hover { background: var(--red); color: white; }
+.btn-pdf { background: var(--sky-light); color: var(--sky-dark); border: 1.5px solid #bae6fd; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 7px; cursor: pointer; transition: all 0.15s; }
+.btn-pdf:hover { background: var(--sky); color: white; }
+.btn-close-modal { background: var(--navy); color: white; border: none; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 7px; cursor: pointer; transition: background 0.15s; }
+.btn-close-modal:hover { background: var(--navy3); }
 
 /* ── TOAST ── */
 .toast {
-position: fixed;
-bottom: 24px;
-right: 24px;
-background: var(–navy);
-color: white;
-padding: 12px 18px;
-border-radius: 9px;
-font-size: 13px;
-font-weight: 500;
-border-left: 4px solid var(–sky);
-transform: translateY(70px);
-opacity: 0;
-transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-z-index: 200;
-box-shadow: 0 8px 24px rgba(15,31,61,0.2);
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--navy);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  border-left: 4px solid var(--sky);
+  transform: translateY(70px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 200;
+  box-shadow: 0 8px 24px rgba(15,31,61,0.2);
 }
 .toast.show { transform: translateY(0); opacity: 1; }
 
@@ -749,102 +748,100 @@ box-shadow: 0 8px 24px rgba(15,31,61,0.2);
 
 /* ── BOTTOM TAB BAR (mobile) ── */
 .bottom-tab-bar {
-display: none;
+  display: none;
 }
 
 @media (max-width: 900px) {
-.sidebar { display: none; }
-.form-panel { width: 320px; }
+  .sidebar { display: none; }
+  .form-panel { width: 320px; }
 }
 
 @media (max-width: 640px) {
-body { flex-direction: column; overflow: auto; }
+  body { flex-direction: column; overflow: auto; }
 
-.main { overflow: auto; }
+  .main { overflow: auto; }
 
-.topbar { padding: 0 16px; }
-.topbar-title { font-size: 13px; }
-.topbar-actions .btn span { display: none; }
-.topbar-logo { display: block; }
+  .topbar { padding: 0 16px; }
+  .topbar-title { font-size: 13px; }
+  .topbar-actions .btn span { display: none; }
+  .topbar-logo { display: block; }
 
-.content {
-flex-direction: column;
-overflow: visible;
-flex: 1;
-}
+  .content {
+    flex-direction: column;
+    overflow: visible;
+    flex: 1;
+  }
 
-.form-panel {
-width: 100%;
-border-right: none;
-border-bottom: none;
-overflow: visible;
-display: flex;
-flex-direction: column;
-}
+  .form-panel {
+    width: 100%;
+    border-right: none;
+    border-bottom: none;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
 
-.form-panel.hidden { display: none; }
+  .form-panel.hidden { display: none; }
 
-.records-panel {
-flex: 1;
-overflow: visible;
-}
+  .records-panel {
+    flex: 1;
+    overflow: visible;
+  }
 
-.records-list {
-overflow: visible;
-padding-bottom: 80px;
-}
+  .records-list {
+    overflow: visible;
+    padding-bottom: 80px;
+  }
 
-.form-body {
-padding-bottom: 80px;
-}
+  .form-body {
+    padding-bottom: 80px;
+  }
 
-/* Bottom tab bar */
-.bottom-tab-bar {
-display: flex;
-position: fixed;
-bottom: 0;
-left: 0;
-right: 0;
-background: var(–white);
-border-top: 1px solid var(–border);
-z-index: 50;
-box-shadow: 0 -4px 16px rgba(15,31,61,0.08);
-}
+  /* Bottom tab bar */
+  .bottom-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    z-index: 50;
+    box-shadow: 0 -4px 16px rgba(15,31,61,0.08);
+  }
 
-.tab-item {
-flex: 1;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-padding: 10px 8px;
-font-size: 10px;
-font-weight: 600;
-color: var(–muted);
-cursor: pointer;
-transition: all 0.15s;
-gap: 4px;
-text-decoration: none;
-border: none;
-background: none;
-font-family: ‘Noto Sans KR’, sans-serif;
-}
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    gap: 4px;
+    text-decoration: none;
+    border: none;
+    background: none;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
 
-.tab-item .tab-icon { font-size: 20px; line-height: 1; }
-.tab-item.active { color: var(–navy); }
-.tab-item.active .tab-icon-wrap {
-background: var(–sky-light);
-border-radius: 10px;
-padding: 4px 16px;
-}
+  .tab-item .tab-icon { font-size: 20px; line-height: 1; }
+  .tab-item.active { color: var(--navy); }
+  .tab-item.active .tab-icon-wrap {
+    background: var(--sky-light);
+    border-radius: 10px;
+    padding: 4px 16px;
+  }
 }
 </style>
-
 </head>
 <body>
 
 <!-- SIDEBAR -->
-
 <aside class="sidebar">
   <div class="sidebar-logo">
     <img src="intologo2.png" alt="인투유학CENTER" style="width:100%; max-width:170px; height:auto; display:block; object-fit:contain;">
@@ -878,11 +875,9 @@ padding: 4px 16px;
 </aside>
 
 <!-- MAIN -->
-
 <div class="main">
 
   <!-- Topbar -->
-
   <div class="topbar">
     <div class="topbar-left">
       <img src="intologo1.png" alt="인투유학CENTER" class="topbar-logo">
@@ -896,102 +891,98 @@ padding: 4px 16px;
   </div>
 
   <!-- Content: Form + Records -->
-
   <div class="content">
 
-```
-<!-- FORM PANEL -->
-<div class="form-panel">
-  <div class="form-panel-header">
-    <h2>신규 상담 등록</h2>
-    <p>새 상담 내용을 입력하세요</p>
-  </div>
+    <!-- FORM PANEL -->
+    <div class="form-panel">
+      <div class="form-panel-header">
+        <h2>신규 상담 등록</h2>
+        <p>새 상담 내용을 입력하세요</p>
+      </div>
 
-  <div class="form-body">
-    <div class="form-grid">
+      <div class="form-body">
+        <div class="form-grid">
 
-      <div class="form-row">
-        <div class="fg">
-          <label class="lbl">학생 이름</label>
-          <input type="text" id="name" placeholder="홍길동">
-        </div>
-        <div class="fg">
-          <label class="lbl">연락처</label>
-          <input type="text" id="phone" placeholder="010-0000-0000">
+          <div class="form-row">
+            <div class="fg">
+              <label class="lbl">학생 이름</label>
+              <input type="text" id="name" placeholder="홍길동">
+            </div>
+            <div class="fg">
+              <label class="lbl">연락처</label>
+              <input type="text" id="phone" placeholder="010-0000-0000">
+            </div>
+          </div>
+
+          <div class="form-row-3">
+            <div class="fg">
+              <label class="lbl">상담 일자</label>
+              <input type="date" id="date">
+            </div>
+            <div class="fg">
+              <label class="lbl">상담자</label>
+              <select id="consultant"></select>
+            </div>
+            <div class="fg">
+              <label class="lbl">유입 경로</label>
+              <select id="channel" onchange="onChannelChange()"></select>
+              <select id="channelSub" style="display:none; margin-top:6px;"></select>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label class="lbl">상담 내용 요약</label>
+            <textarea id="notes" placeholder="학생의 목표, 관심 학교, 전공, 비자 문의 등..."></textarea>
+          </div>
+
+          <div class="fg">
+            <label class="lbl">결정 여부</label>
+            <div class="decision-grid">
+              <button class="dec-btn" onclick="selectDecision(this,'yes')">✅ 진행 결정</button>
+              <button class="dec-btn" onclick="selectDecision(this,'thinking')">🤔 검토 중</button>
+              <button class="dec-btn" onclick="selectDecision(this,'pending')">⏳ 재연락 예정</button>
+              <button class="dec-btn" onclick="selectDecision(this,'no')">❌ 미진행</button>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label class="lbl">팔로업 메모</label>
+            <input type="text" id="followup" placeholder="예: 5월 20일 재연락 예정...">
+          </div>
+
         </div>
       </div>
 
-      <div class="form-row-3">
-        <div class="fg">
-          <label class="lbl">상담 일자</label>
-          <input type="date" id="date">
-        </div>
-        <div class="fg">
-          <label class="lbl">상담자</label>
-          <select id="consultant"></select>
-        </div>
-        <div class="fg">
-          <label class="lbl">유입 경로</label>
-          <select id="channel" onchange="onChannelChange()"></select>
-          <select id="channelSub" style="display:none; margin-top:6px;"></select>
-        </div>
+      <div class="form-footer">
+        <button class="btn-reset" onclick="clearForm()">초기화</button>
+        <button class="btn-save" onclick="saveRecord()">저장하기 →</button>
       </div>
-
-      <div class="fg">
-        <label class="lbl">상담 내용 요약</label>
-        <textarea id="notes" placeholder="학생의 목표, 관심 학교, 전공, 비자 문의 등..."></textarea>
-      </div>
-
-      <div class="fg">
-        <label class="lbl">결정 여부</label>
-        <div class="decision-grid">
-          <button class="dec-btn" onclick="selectDecision(this,'yes')">✅ 진행 결정</button>
-          <button class="dec-btn" onclick="selectDecision(this,'thinking')">🤔 검토 중</button>
-          <button class="dec-btn" onclick="selectDecision(this,'pending')">⏳ 재연락 예정</button>
-          <button class="dec-btn" onclick="selectDecision(this,'no')">❌ 미진행</button>
-        </div>
-      </div>
-
-      <div class="fg">
-        <label class="lbl">팔로업 메모</label>
-        <input type="text" id="followup" placeholder="예: 5월 20일 재연락 예정...">
-      </div>
-
     </div>
-  </div>
 
-  <div class="form-footer">
-    <button class="btn-reset" onclick="clearForm()">초기화</button>
-    <button class="btn-save" onclick="saveRecord()">저장하기 →</button>
-  </div>
-</div>
+    <!-- RECORDS PANEL -->
+    <div class="records-panel hidden">
+      <div class="records-toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="이름, 연락처, 내용으로 검색..." oninput="renderRecords()">
+        </div>
+        <select class="filter-select" id="filterDecision" onchange="renderRecords()">
+          <option value="">전체</option>
+          <option value="yes">진행 결정</option>
+          <option value="thinking">검토 중</option>
+          <option value="pending">재연락</option>
+          <option value="no">미진행</option>
+        </select>
+        <div class="records-count" id="countBadge">0건</div>
+      </div>
 
-<!-- RECORDS PANEL -->
-<div class="records-panel hidden">
-  <div class="records-toolbar">
-    <div class="search-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" placeholder="이름, 연락처, 내용으로 검색..." oninput="renderRecords()">
+      <div class="records-list" id="recordsList"></div>
     </div>
-    <select class="filter-select" id="filterDecision" onchange="renderRecords()">
-      <option value="">전체</option>
-      <option value="yes">진행 결정</option>
-      <option value="thinking">검토 중</option>
-      <option value="pending">재연락</option>
-      <option value="no">미진행</option>
-    </select>
-    <div class="records-count" id="countBadge">0건</div>
-  </div>
-
-  <div class="records-list" id="recordsList"></div>
-</div>
-```
 
   </div>
 </div>
 
 <!-- MODAL -->
-
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-header">
@@ -1010,7 +1001,6 @@ padding: 4px 16px;
 <div class="toast" id="toast"></div>
 
 <!-- BOTTOM TAB BAR (mobile only) -->
-
 <div class="bottom-tab-bar">
   <button class="tab-item active" id="tabForm" onclick="showView('form', this, true)">
     <div class="tab-icon-wrap">
@@ -1293,133 +1283,152 @@ padding: 4px 16px;
     .bd-pending{background:#dbeafe;color:#2563eb}.bd-thinking{background:#fef3c7;color:#d97706}.bd-{background:#f1f5f9;color:#64748b}
     .ft{margin-top:16px;display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:8px}
     @media print{@page{margin:15mm;size:A4 landscape}body{padding:0}}</style></head><body>
-
-```
-<div class="hd"><div><h1>INTO<em>유학</em>CENTER</h1><p>상담 기록부 · 총 ${records.length}건</p></div><p>출력일: ${today}</p></div>
-<table><thead><tr><th>번호</th><th>이름/연락처</th><th>상담일</th><th>상담자</th><th>유입경로</th><th>상담내용</th><th>결정여부</th><th>팔로업</th></tr></thead>
-<tbody>${rows}</tbody></table>
-<div class="ft"><span>INTO유학CENTER · Student Consultation Records</span><span>${today}</span></div>
-</body></html>`);
-```
-
-}
-
-function exportSinglePDF() {
-if (currentModalIndex < 0) return;
-const r = records[currentModalIndex];
-const today = new Date().toLocaleDateString(‘ko-KR’);
-buildPrintWindow(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"> <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet"> <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Noto Sans KR',sans-serif;color:#0f172a;padding:40px;max-width:580px;margin:0 auto} .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0f1f3d;padding-bottom:12px;margin-bottom:8px} .brand{font-size:20px;font-weight:900}.brand em{color:#0369a1;font-style:normal} .brand small{display:block;font-size:9px;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;font-weight:400;margin-top:2px} .bar{height:4px;background:linear-gradient(90deg,#0369a1,#38bdf8);border-radius:2px;margin-bottom:24px} .title{font-size:16px;font-weight:700;margin-bottom:20px;padding-bottom:10px;border-bottom:1px dashed #e2e8f0} .grid{display:grid;grid-template-columns:120px 1fr;gap:0} .lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;padding:11px 0;border-bottom:1px solid #f1f5f9;padding-right:12px} .val{font-size:13px;color:#0f172a;padding:11px 0;border-bottom:1px solid #f1f5f9;line-height:1.6} .badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700} .bd-yes{background:#dcfce7;color:#16a34a}.bd-no{background:#fee2e2;color:#dc2626} .bd-pending{background:#dbeafe;color:#2563eb}.bd-thinking{background:#fef3c7;color:#d97706}.bd-{background:#f1f5f9;color:#64748b} .ft{margin-top:28px;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:10px} @media print{@page{margin:20mm;size:A4}body{padding:0}}</style></head><body> <div class="top"><div class="brand">INTO<em>유학</em>CENTER<small>Student Consultation Record</small></div><span style="font-size:11px;color:#94a3b8;">${today}</span></div> <div class="bar"></div> <div class="title">📋 ${r.name} 님 상담 기록</div> <div class="grid"> <div class="lbl">이름</div><div class="val">${r.name}</div> <div class="lbl">연락처</div><div class="val">${r.phone}</div> <div class="lbl">상담 일자</div><div class="val">${r.date||'미기재'}</div> <div class="lbl">상담자</div><div class="val">${r.consultant||'미기재'}</div> <div class="lbl">유입 경로</div><div class="val">${r.channel||'미기재'}</div> <div class="lbl">상담 내용</div><div class="val">${(r.notes||'없음').replace(/\n/g,'<br>')}</div> <div class="lbl">결정 여부</div><div class="val"><span class="badge bd-${r.decision||''}">${decisionLabelMap[r.decision||'']}</span></div> <div class="lbl">팔로업</div><div class="val">${r.followup||'없음'}</div> </div> <div class="ft"><span>INTO유학CENTER · Student Consultation Chart</span><span>${today}</span></div> </body></html>`);
-}
-
-function showToast(msg) {
-const t = document.getElementById(‘toast’);
-t.textContent = msg; t.classList.add(‘show’);
-setTimeout(() => t.classList.remove(‘show’), 2800);
-}
-
-function showView(v, el, fromTab) {
-// Sync sidebar nav
-document.querySelectorAll(’.nav-item’).forEach(n => n.classList.remove(‘active’));
-if (!fromTab) el.classList.add(‘active’);
-else {
-const sideItems = document.querySelectorAll(’.nav-item’);
-if (v === ‘form’ && sideItems[0]) sideItems[0].classList.add(‘active’);
-if (v === ‘records’ && sideItems[1]) sideItems[1].classList.add(‘active’);
-}
-
-```
-// Sync bottom tabs
-document.querySelectorAll('.tab-item').forEach(t => {
-  t.classList.remove('active');
-  const wrap = t.querySelector('.tab-icon-wrap');
-  if (wrap) { wrap.style.background = ''; wrap.style.borderRadius = ''; wrap.style.padding = ''; }
-});
-const tabEl = v === 'form' ? document.getElementById('tabForm') : document.getElementById('tabRecords');
-if (tabEl) {
-  tabEl.classList.add('active');
-  const wrap = tabEl.querySelector('.tab-icon-wrap');
-  if (wrap) { wrap.style.background = 'var(--sky-light)'; wrap.style.borderRadius = '10px'; wrap.style.padding = '4px 16px'; }
-}
-
-const formPanel = document.querySelector('.form-panel');
-const recordsPanel = document.querySelector('.records-panel');
-const formBody = document.querySelector('.form-body');
-const formFooter = document.querySelector('.form-footer');
-
-if (v === 'form') {
-  formPanel.classList.remove('hidden');
-  recordsPanel.classList.add('hidden');
-  // 폼을 전체 너비로
-  formPanel.style.width = '100%';
-  formPanel.style.borderRight = 'none';
-  if (formBody) { formBody.style.maxWidth = '700px'; formBody.style.margin = '0 auto'; }
-  if (formFooter) { formFooter.style.maxWidth = '700px'; formFooter.style.margin = '0 auto'; formFooter.style.width = '100%'; }
-  document.getElementById('topbarTitle').textContent = '신규 상담 등록';
-} else {
-  formPanel.classList.add('hidden');
-  recordsPanel.classList.remove('hidden');
-  // 폼 너비 초기화
-  formPanel.style.width = '';
-  formPanel.style.borderRight = '';
-  if (formBody) { formBody.style.maxWidth = ''; formBody.style.margin = ''; }
-  if (formFooter) { formFooter.style.maxWidth = ''; formFooter.style.margin = ''; formFooter.style.width = ''; }
-  document.getElementById('topbarTitle').textContent = '상담 기록 목록';
-}
-```
-
-}
-
-// Sheets에서 데이터 불러오기
-async function loadFromSheets() {
-try {
-const res = await fetch(SHEET_URL + ‘?t=’ + Date.now(), {
-method: ‘GET’,
-redirect: ‘follow’,
-});
-const sheetData = await res.json();
-if (!Array.isArray(sheetData) || sheetData.length === 0) return;
-
-```
-  const decisionMap = { '진행 결정':'yes', '검토 중':'thinking', '재연락 예정':'pending', '미진행':'no' };
-
-  const loaded = sheetData.map(row => ({
-    id: Date.now() + Math.random(),
-    name: row['이름'] || '',
-    phone: row['연락처'] || '',
-    date: row['상담일자'] || '',
-    consultant: row['상담자'] || '',
-    channel: row['유입경로'] || '',
-    notes: row['상담내용'] || '',
-    decision: decisionMap[row['결정여부']] || '',
-    followup: row['팔로업'] || ''
-  })).filter(r => r.name);
-
-  if (loaded.length > 0) {
-    records = loaded.reverse();
-    localStorage.setItem('intoConsultations', JSON.stringify(records));
-    updateStats();
-    renderRecords();
-    showToast('✅ 최신 데이터 불러옴 (' + records.length + '건)');
+    <div class="hd"><div><h1>INTO<em>유학</em>CENTER</h1><p>상담 기록부 · 총 ${records.length}건</p></div><p>출력일: ${today}</p></div>
+    <table><thead><tr><th>번호</th><th>이름/연락처</th><th>상담일</th><th>상담자</th><th>유입경로</th><th>상담내용</th><th>결정여부</th><th>팔로업</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="ft"><span>INTO유학CENTER · Student Consultation Records</span><span>${today}</span></div>
+    </body></html>`);
   }
-} catch(e) {
-  console.log('Sheets 로드 실패, 로컬 데이터 사용');
-}
-```
 
-}
+  function exportSinglePDF() {
+    if (currentModalIndex < 0) return;
+    const r = records[currentModalIndex];
+    const today = new Date().toLocaleDateString('ko-KR');
+    buildPrintWindow(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Noto Sans KR',sans-serif;color:#0f172a;padding:40px;max-width:580px;margin:0 auto}
+    .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0f1f3d;padding-bottom:12px;margin-bottom:8px}
+    .brand{font-size:20px;font-weight:900}.brand em{color:#0369a1;font-style:normal}
+    .brand small{display:block;font-size:9px;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;font-weight:400;margin-top:2px}
+    .bar{height:4px;background:linear-gradient(90deg,#0369a1,#38bdf8);border-radius:2px;margin-bottom:24px}
+    .title{font-size:16px;font-weight:700;margin-bottom:20px;padding-bottom:10px;border-bottom:1px dashed #e2e8f0}
+    .grid{display:grid;grid-template-columns:120px 1fr;gap:0}
+    .lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;padding:11px 0;border-bottom:1px solid #f1f5f9;padding-right:12px}
+    .val{font-size:13px;color:#0f172a;padding:11px 0;border-bottom:1px solid #f1f5f9;line-height:1.6}
+    .badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:12px;font-weight:700}
+    .bd-yes{background:#dcfce7;color:#16a34a}.bd-no{background:#fee2e2;color:#dc2626}
+    .bd-pending{background:#dbeafe;color:#2563eb}.bd-thinking{background:#fef3c7;color:#d97706}.bd-{background:#f1f5f9;color:#64748b}
+    .ft{margin-top:28px;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:10px}
+    @media print{@page{margin:20mm;size:A4}body{padding:0}}</style></head><body>
+    <div class="top"><div class="brand">INTO<em>유학</em>CENTER<small>Student Consultation Record</small></div><span style="font-size:11px;color:#94a3b8;">${today}</span></div>
+    <div class="bar"></div>
+    <div class="title">📋 ${r.name} 님 상담 기록</div>
+    <div class="grid">
+      <div class="lbl">이름</div><div class="val">${r.name}</div>
+      <div class="lbl">연락처</div><div class="val">${r.phone}</div>
+      <div class="lbl">상담 일자</div><div class="val">${r.date||'미기재'}</div>
+      <div class="lbl">상담자</div><div class="val">${r.consultant||'미기재'}</div>
+      <div class="lbl">유입 경로</div><div class="val">${r.channel||'미기재'}</div>
+      <div class="lbl">상담 내용</div><div class="val">${(r.notes||'없음').replace(/\n/g,'<br>')}</div>
+      <div class="lbl">결정 여부</div><div class="val"><span class="badge bd-${r.decision||''}">${decisionLabelMap[r.decision||'']}</span></div>
+      <div class="lbl">팔로업</div><div class="val">${r.followup||'없음'}</div>
+    </div>
+    <div class="ft"><span>INTO유학CENTER · Student Consultation Chart</span><span>${today}</span></div>
+    </body></html>`);
+  }
 
-loadFromSheets();
-updateStats();
-renderRecords();
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
 
-// 초기 로드: 폼 전체 너비 적용
-const _fp = document.querySelector(’.form-panel’);
-const _fb = document.querySelector(’.form-body’);
-const _ff = document.querySelector(’.form-footer’);
-if (_fp) { _fp.style.width = ‘100%’; _fp.style.borderRight = ‘none’; }
-if (_fb) { _fb.style.maxWidth = ‘700px’; _fb.style.margin = ‘0 auto’; }
-if (_ff) { _ff.style.maxWidth = ‘700px’; _ff.style.margin = ‘0 auto’; _ff.style.width = ‘100%’; }
+  function showView(v, el, fromTab) {
+    // Sync sidebar nav
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (!fromTab) el.classList.add('active');
+    else {
+      const sideItems = document.querySelectorAll('.nav-item');
+      if (v === 'form' && sideItems[0]) sideItems[0].classList.add('active');
+      if (v === 'records' && sideItems[1]) sideItems[1].classList.add('active');
+    }
+
+    // Sync bottom tabs
+    document.querySelectorAll('.tab-item').forEach(t => {
+      t.classList.remove('active');
+      const wrap = t.querySelector('.tab-icon-wrap');
+      if (wrap) { wrap.style.background = ''; wrap.style.borderRadius = ''; wrap.style.padding = ''; }
+    });
+    const tabEl = v === 'form' ? document.getElementById('tabForm') : document.getElementById('tabRecords');
+    if (tabEl) {
+      tabEl.classList.add('active');
+      const wrap = tabEl.querySelector('.tab-icon-wrap');
+      if (wrap) { wrap.style.background = 'var(--sky-light)'; wrap.style.borderRadius = '10px'; wrap.style.padding = '4px 16px'; }
+    }
+
+    const formPanel = document.querySelector('.form-panel');
+    const recordsPanel = document.querySelector('.records-panel');
+    const formBody = document.querySelector('.form-body');
+    const formFooter = document.querySelector('.form-footer');
+
+    if (v === 'form') {
+      formPanel.classList.remove('hidden');
+      recordsPanel.classList.add('hidden');
+      // 폼을 전체 너비로
+      formPanel.style.width = '100%';
+      formPanel.style.borderRight = 'none';
+      if (formBody) { formBody.style.maxWidth = '700px'; formBody.style.margin = '0 auto'; }
+      if (formFooter) { formFooter.style.maxWidth = '700px'; formFooter.style.margin = '0 auto'; formFooter.style.width = '100%'; }
+      document.getElementById('topbarTitle').textContent = '신규 상담 등록';
+    } else {
+      formPanel.classList.add('hidden');
+      recordsPanel.classList.remove('hidden');
+      // 폼 너비 초기화
+      formPanel.style.width = '';
+      formPanel.style.borderRight = '';
+      if (formBody) { formBody.style.maxWidth = ''; formBody.style.margin = ''; }
+      if (formFooter) { formFooter.style.maxWidth = ''; formFooter.style.margin = ''; formFooter.style.width = ''; }
+      document.getElementById('topbarTitle').textContent = '상담 기록 목록';
+    }
+  }
+
+  // Sheets에서 데이터 불러오기
+  async function loadFromSheets() {
+    try {
+      const res = await fetch(SHEET_URL + '?t=' + Date.now(), {
+        method: 'GET',
+        redirect: 'follow',
+      });
+      const sheetData = await res.json();
+      if (!Array.isArray(sheetData) || sheetData.length === 0) return;
+
+      const decisionMap = { '진행 결정':'yes', '검토 중':'thinking', '재연락 예정':'pending', '미진행':'no' };
+
+      const loaded = sheetData.map(row => ({
+        id: Date.now() + Math.random(),
+        name: row['이름'] || '',
+        phone: row['연락처'] || '',
+        date: row['상담일자'] || '',
+        consultant: row['상담자'] || '',
+        channel: row['유입경로'] || '',
+        notes: row['상담내용'] || '',
+        decision: decisionMap[row['결정여부']] || '',
+        followup: row['팔로업'] || ''
+      })).filter(r => r.name);
+
+      if (loaded.length > 0) {
+        records = loaded.reverse();
+        localStorage.setItem('intoConsultations', JSON.stringify(records));
+        updateStats();
+        renderRecords();
+        showToast('✅ 최신 데이터 불러옴 (' + records.length + '건)');
+      }
+    } catch(e) {
+      console.log('Sheets 로드 실패, 로컬 데이터 사용');
+    }
+  }
+
+  loadFromSheets();
+  updateStats();
+  renderRecords();
+
+  // 초기 로드: 폼 전체 너비 적용
+  const _fp = document.querySelector('.form-panel');
+  const _fb = document.querySelector('.form-body');
+  const _ff = document.querySelector('.form-footer');
+  if (_fp) { _fp.style.width = '100%'; _fp.style.borderRight = 'none'; }
+  if (_fb) { _fb.style.maxWidth = '700px'; _fb.style.margin = '0 auto'; }
+  if (_ff) { _ff.style.maxWidth = '700px'; _ff.style.margin = '0 auto'; _ff.style.width = '100%'; }
 </script>
-
 </body>
 </html>
