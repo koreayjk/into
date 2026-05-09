@@ -399,6 +399,7 @@
 
 <script>
   const PIN = '2414';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzla7nk3JEMasIHJYvzJNCR2D4Bl8ZEJNM1dIiaUC9sVW6mjRJZQvyKE0WFTbIQUSSy/exec';
 
   // Default data
   const DEFAULT = {
@@ -420,13 +421,30 @@
       if (val === PIN) {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('adminScreen').style.display = 'block';
-        renderAll();
+        loadFromSheets();
       } else {
         document.getElementById('loginError').textContent = '❌ PIN 번호가 틀렸습니다.';
         document.getElementById('pinInput').value = '';
         setTimeout(() => document.getElementById('loginError').textContent = '', 2000);
       }
     }
+  }
+
+  async function loadFromSheets() {
+    try {
+      const res = await fetch(SHEET_URL + '?type=admin&t=' + Date.now(), { redirect: 'follow' });
+      const sheetsData = await res.json();
+      if (sheetsData && sheetsData.consultants) {
+        data.consultants = sheetsData.consultants;
+        data.channels = sheetsData.channels;
+        data.kcpa = sheetsData.kcpa;
+        data.academy = sheetsData.academy;
+        localStorage.setItem('admin_settings', JSON.stringify(data));
+      }
+    } catch(e) {
+      console.log('Sheets load failed, using local data');
+    }
+    renderAll();
   }
 
   function renderList(containerId, arr, deleteFunc) {
@@ -506,12 +524,26 @@
     renderAll();
   }
 
-  function saveAll() {
+  async function saveAll() {
+    // 로컬 저장 (하위 호환)
     localStorage.setItem('admin_consultants', JSON.stringify(data.consultants));
     localStorage.setItem('admin_channels', JSON.stringify(data.channels));
     localStorage.setItem('admin_kcpa', JSON.stringify(data.kcpa));
     localStorage.setItem('admin_academy', JSON.stringify(data.academy));
-    showToast('✅ 저장되었습니다!');
+    // 통합 저장
+    localStorage.setItem('admin_settings', JSON.stringify(data));
+    showToast('💾 저장 중...');
+    // Sheets에 저장
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'saveAdmin', data: data })
+      });
+      showToast('✅ 모든 기기에 저장 완료!');
+    } catch {
+      showToast('✅ 로컬 저장 완료. (Sheets 저장 실패)');
+    }
   }
 
   function showToast(msg) {
