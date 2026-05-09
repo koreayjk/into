@@ -1223,15 +1223,32 @@ textarea { resize: vertical; min-height: 160px; }
   function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
   function closeModalDirect() { document.getElementById('modalOverlay').classList.remove('open'); currentModalIndex = -1; }
 
-  function deleteRecord() {
+  async function deleteRecord() {
     if (currentModalIndex < 0) return;
     if (!confirm('이 상담 기록을 삭제하시겠습니까?')) return;
+    const record = records[currentModalIndex];
+    const id = record.id;
+
+    // 로컬에서 삭제
     records.splice(currentModalIndex, 1);
     localStorage.setItem('intoConsultations', JSON.stringify(records));
     closeModalDirect();
     updateStats();
     renderRecords();
-    showToast('🗑️ 삭제되었습니다.');
+    showToast('🗑️ 삭제 중...');
+
+    // Sheets에서도 삭제
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', id: String(id) })
+      });
+      showToast('✅ Sheets에서도 삭제 완료!');
+    } catch {
+      showToast('⚠️ 로컬 삭제 완료. Sheets 삭제 실패.');
+    }
   }
 
   function exportData() {
