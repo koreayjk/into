@@ -1004,7 +1004,7 @@ textarea { resize: vertical; min-height: 80px; }
 </div>
 
 <script>
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwx0tolAa5REyEgJyrAN8A801DfUcaNIaPYME5w7mw_iM0t-On2aJhMD95eTcDY_qNioA/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxbFNGBT58_6xt6AAq6XzZmcSnUG4P_IjLqPMR2X7iTtEEkezfk1x32NcPlAjkW9DGu/exec';
 
   const DEFAULT = {
     consultants: ['Moses 목사님', '스태프 A', '스태프 B'],
@@ -1363,6 +1363,40 @@ textarea { resize: vertical; min-height: 80px; }
     }
   }
 
+  // Sheets에서 데이터 불러오기
+  async function loadFromSheets() {
+    try {
+      const res = await fetch(SHEET_URL);
+      const sheetData = await res.json();
+      if (!Array.isArray(sheetData) || sheetData.length === 0) return;
+
+      const decisionMap = { '진행 결정':'yes', '검토 중':'thinking', '재연락 예정':'pending', '미진행':'no' };
+
+      const loaded = sheetData.map(row => ({
+        id: Date.now() + Math.random(),
+        name: row['이름'] || '',
+        phone: row['연락처'] || '',
+        date: row['상담일자'] || '',
+        consultant: row['상담자'] || '',
+        channel: row['유입경로'] || '',
+        notes: row['상담내용'] || '',
+        decision: decisionMap[row['결정여부']] || '',
+        followup: row['팔로업'] || ''
+      })).filter(r => r.name);
+
+      if (loaded.length > 0) {
+        records = loaded.reverse();
+        localStorage.setItem('intoConsultations', JSON.stringify(records));
+        updateStats();
+        renderRecords();
+        showToast('✅ 최신 데이터 불러옴 (' + records.length + '건)');
+      }
+    } catch(e) {
+      console.log('Sheets 로드 실패, 로컬 데이터 사용');
+    }
+  }
+
+  loadFromSheets();
   updateStats();
   renderRecords();
 
