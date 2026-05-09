@@ -1077,12 +1077,27 @@ textarea { resize: vertical; min-height: 160px; }
   };
 
   function getAdminData() {
+    const saved = JSON.parse(localStorage.getItem('admin_settings') || 'null');
+    if (saved) return saved;
     return {
-      consultants: JSON.parse(localStorage.getItem('admin_consultants') || 'null') || DEFAULT.consultants,
-      channels: JSON.parse(localStorage.getItem('admin_channels') || 'null') || DEFAULT.channels,
-      kcpa: JSON.parse(localStorage.getItem('admin_kcpa') || 'null') || DEFAULT.kcpa,
-      academy: JSON.parse(localStorage.getItem('admin_academy') || 'null') || DEFAULT.academy
+      consultants: DEFAULT.consultants,
+      channels: DEFAULT.channels,
+      kcpa: DEFAULT.kcpa,
+      academy: DEFAULT.academy
     };
+  }
+
+  async function loadAdminFromSheets() {
+    try {
+      const res = await fetch(SHEET_URL + '?type=admin&t=' + Date.now(), { redirect: 'follow' });
+      const data = await res.json();
+      if (data && data.consultants) {
+        localStorage.setItem('admin_settings', JSON.stringify(data));
+        populateSelects();
+      }
+    } catch(e) {
+      console.log('Admin settings load failed, using local');
+    }
   }
 
   function populateSelects() {
@@ -1129,6 +1144,7 @@ textarea { resize: vertical; min-height: 160px; }
 
   document.getElementById('date').valueAsDate = new Date();
   populateSelects();
+  loadAdminFromSheets();
 
   function selectDecision(el, val) {
     selectedDecision = val;
