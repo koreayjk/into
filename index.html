@@ -1606,7 +1606,10 @@ textarea { resize: vertical; min-height: 160px; }
       })).filter(r => r.name);
 
       if (loaded.length > 0) {
-        records = loaded.reverse();
+        records = loaded.reverse().map(r => ({
+          ...r,
+          date: r.date ? String(r.date).substring(0, 10) : ''
+        }));
         localStorage.setItem('intoConsultations', JSON.stringify(records));
         updateStats();
         renderRecords();
