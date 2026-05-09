@@ -255,7 +255,7 @@ body {
 }
 
 .form-panel-header {
-  padding: 20px 22px 16px;
+  padding: 20px 32px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--navy);
   position: sticky;
@@ -275,11 +275,14 @@ body {
   margin-top: 2px;
 }
 
-.form-body { padding: 18px 22px; flex: 1; }
+.form-body { padding: 24px 32px; flex: 1; }
 
 .form-grid { display: flex; flex-direction: column; gap: 14px; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* 이름+연락처, 내용, 팔로업을 넓게 */
+.fg.full-grid { grid-column: 1 / -1; }
 
 .fg {
   display: flex;
@@ -368,7 +371,7 @@ textarea { resize: vertical; min-height: 80px; }
 .form-footer {
   display: flex;
   gap: 8px;
-  padding: 14px 22px;
+  padding: 14px 32px;
   border-top: 1px solid var(--border);
   background: white;
   position: sticky;
@@ -1367,8 +1370,8 @@ textarea { resize: vertical; min-height: 80px; }
       // 폼을 전체 너비로
       formPanel.style.width = '100%';
       formPanel.style.borderRight = 'none';
-      if (formBody) { formBody.style.maxWidth = '960px'; formBody.style.margin = '0 auto'; }
-      if (formFooter) { formFooter.style.maxWidth = '960px'; formFooter.style.margin = '0 auto'; formFooter.style.width = '100%'; }
+      if (formBody) { formBody.style.maxWidth = 'none'; formBody.style.margin = '0'; }
+      if (formFooter) { formFooter.style.maxWidth = 'none'; formFooter.style.margin = '0'; formFooter.style.width = '100%'; }
       document.getElementById('topbarTitle').textContent = '신규 상담 등록';
     } else {
       formPanel.classList.add('hidden');
@@ -1427,8 +1430,8 @@ textarea { resize: vertical; min-height: 80px; }
   const _fb = document.querySelector('.form-body');
   const _ff = document.querySelector('.form-footer');
   if (_fp) { _fp.style.width = '100%'; _fp.style.borderRight = 'none'; }
-  if (_fb) { _fb.style.maxWidth = '960px'; _fb.style.margin = '0 auto'; }
-  if (_ff) { _ff.style.maxWidth = '960px'; _ff.style.margin = '0 auto'; _ff.style.width = '100%'; }
+  if (_fb) { _fb.style.maxWidth = 'none'; _fb.style.margin = '0'; }
+  if (_ff) { _ff.style.maxWidth = 'none'; _ff.style.margin = '0'; _ff.style.width = '100%'; }
 </script>
 </body>
 </html>
