@@ -1819,7 +1819,10 @@ textarea { resize: vertical; min-height: 160px; }
       </div>`).join('');
   }
 
+  let currentInquiryIndex = -1;
+
   function openInquiryModal(index) {
+    currentInquiryIndex = index;
     const r = inquiries[index];
     document.getElementById('modalName').textContent = (r['이름']||'-') + ' 님 상담 신청';
     document.getElementById('modalBody').innerHTML = `
@@ -1831,8 +1834,58 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="detail-row"><div class="detail-label">문의 내용</div><div class="detail-value" style="white-space:pre-wrap;">${r['문의내용']||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">개인정보 동의</div><div class="detail-value">${r['개인정보동의']||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">신청 일시</div><div class="detail-value">${r['신청일시']||'-'}</div></div>`;
-    document.getElementById('modalFooter').innerHTML = '<button class="btn-close-modal" onclick="closeModalDirect()">닫기</button>';
+    document.getElementById('modalFooter').innerHTML = `
+      <button class="btn-danger" onclick="deleteInquiry()">🗑 삭제</button>
+      <button class="btn-pdf" style="background:var(--green-bg);color:var(--green);border-color:#86efac;" onclick="openInquiryEditModal()">✏️ 수정</button>
+      <button class="btn-close-modal" onclick="closeModalDirect()">닫기</button>`;
     document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  async function deleteInquiry() {
+    if (currentInquiryIndex < 0) return;
+    if (!confirm('이 신청 내역을 삭제하시겠습니까?')) return;
+    const r = inquiries[currentInquiryIndex];
+    inquiries.splice(currentInquiryIndex, 1);
+    closeModalDirect();
+    renderInquiries();
+    showToast('🗑️ 삭제 중...');
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'deleteInquiry', date: r['신청일시'], name: r['이름'] })
+      });
+      showToast('✅ 삭제 완료!');
+    } catch { showToast('⚠️ 로컬 삭제 완료. Sheets 삭제 실패.'); }
+  }
+
+  function openInquiryEditModal() {
+    if (currentInquiryIndex < 0) return;
+    const r = inquiries[currentInquiryIndex];
+    // 수정 모달 재활용 - 신청 데이터로 채우기
+    document.getElementById('editModalOverlay').classList.add('open');
+    document.getElementById('editName').value = r['이름'] || '';
+    document.getElementById('editPhone').value = r['연락처'] || '';
+    document.getElementById('editNotes').value = r['문의내용'] || '';
+    document.getElementById('editFollowup').value = r['학년'] || '';
+    // 저장 버튼 교체
+    document.querySelector('#editModalOverlay .btn-save').onclick = saveInquiryEdit;
+  }
+
+  async function saveInquiryEdit() {
+    if (currentInquiryIndex < 0) return;
+    const r = inquiries[currentInquiryIndex];
+    const updated = {
+      ...r,
+      '이름': document.getElementById('editName').value.trim(),
+      '연락처': document.getElementById('editPhone').value.trim(),
+      '문의내용': document.getElementById('editNotes').value.trim(),
+      '학년': document.getElementById('editFollowup').value.trim(),
+    };
+    inquiries[currentInquiryIndex] = updated;
+    document.getElementById('editModalOverlay').classList.remove('open');
+    renderInquiries();
+    showToast('✅ 수정 완료!');
   }
   // ────────────────────────────────────────
 
