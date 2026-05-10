@@ -362,30 +362,37 @@
           <button class="btn btn-primary" onclick="addChannel()">+ 추가</button>
         </div>
 
-        <hr class="divider">
-
-        <!-- KCPA -->
-        <div class="sub-section">
-          <div class="sub-section-title">📋 KCPA 하위 멤버</div>
-          <div id="kcpaList"></div>
-          <div class="add-row" style="margin-top:8px;">
-            <input type="text" id="newKcpa" placeholder="KCPA 멤버 이름..." onkeydown="if(event.key==='Enter') addKcpa()">
-            <button class="btn btn-teal btn-sm" onclick="addKcpa()">+ 추가</button>
-          </div>
-        </div>
 
         <hr class="divider">
 
-        <!-- 학원 -->
-        <div class="sub-section">
-          <div class="sub-section-title">🏫 학원 하위 멤버</div>
-          <div id="academyList"></div>
-          <div class="add-row" style="margin-top:8px;">
-            <input type="text" id="newAcademy" placeholder="학원 멤버 이름..." onkeydown="if(event.key==='Enter') addAcademy()">
-            <button class="btn btn-teal btn-sm" onclick="addAcademy()">+ 추가</button>
-          </div>
-        </div>
+      </div>
+    </div>
 
+    <!-- KCPA 하위멤버 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 KCPA 하위멤버</div>
+      </div>
+      <div class="card-body">
+        <div class="item-list" id="kcpaList"></div>
+        <div class="add-row">
+          <input type="text" id="newKcpa" placeholder="KCPA 멤버 이름..." onkeydown="if(event.key==='Enter') addKcpa()">
+          <button class="btn btn-primary" onclick="addKcpa()">+ 추가</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOU학원 하위멤버 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🏫 MOU학원 하위멤버</div>
+      </div>
+      <div class="card-body">
+        <div class="item-list" id="academyList"></div>
+        <div class="add-row">
+          <input type="text" id="newAcademy" placeholder="학원 이름..." onkeydown="if(event.key==='Enter') addAcademy()">
+          <button class="btn btn-primary" onclick="addAcademy()">+ 추가</button>
+        </div>
       </div>
     </div>
 
