@@ -1184,6 +1184,25 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="records-list" id="recordsList"></div>
     </div>
 
+    <!-- FIRST CONSULTATION PANEL -->
+    <div class="records-panel hidden" id="firstPanel">
+      <div class="records-toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="firstSearch" placeholder="이름, 연락처, 내용으로 검색..." oninput="renderFirstRecords()">
+        </div>
+        <select class="filter-select" id="firstFilterDecision" onchange="renderFirstRecords()">
+          <option value="">전체</option>
+          <option value="yes">진행 결정</option>
+          <option value="thinking">검토 중</option>
+          <option value="pending">재연락</option>
+          <option value="no">미진행</option>
+        </select>
+        <div class="records-count" id="firstCountBadge">0건</div>
+      </div>
+      <div class="records-list" id="firstList"></div>
+    </div>
+
     <!-- INQUIRY PANEL -->
     <div class="records-panel hidden" id="inquiryPanel">
       <div class="records-toolbar">
@@ -1271,6 +1290,10 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="tab-icon">📊</div>
     </div>
     <span>기록 목록</span>
+  </button>
+  <button class="tab-item" id="tabFirst" onclick="showView('first', this, true)">
+    <div class="tab-icon-wrap"><div class="tab-icon">📝</div></div>
+    <span>1차상담</span>
   </button>
   <button class="tab-item" id="tabInquiry" onclick="showView('inquiry', this, true)">
     <div class="tab-icon-wrap">
@@ -1840,6 +1863,116 @@ textarea { resize: vertical; min-height: 160px; }
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
+  // ── 1차 상담 기록 ──
+  let firstRecords = JSON.parse(localStorage.getItem('firstConsultations') || '[]');
+
+  async function loadFirstRecords(silent = false) {
+    if (!silent && !firstRecords.length) {
+      const list = document.getElementById('firstList');
+      if (list) list.innerHTML = '<div class="empty-state"><div class="ei">⏳</div><p>불러오는 중...</p></div>';
+    }
+    try {
+      const res = await fetch(SHEET_URL + '?sheet=1차상담&t=' + Date.now(), { redirect: 'follow' });
+      const data = await res.json();
+      if (Array.isArray(data) && data.length) {
+        const dm = {'진행 결정':'yes','검토 중':'thinking','재연락 예정':'pending','미진행':'no'};
+        firstRecords = data.map(row => ({
+          id: row['id'] || Date.now() + Math.random(),
+          name: row['이름'] || '',
+          phone: row['연락처'] || '',
+          grade: row['학년'] || '',
+          date: String(row['상담일자'] || '').substring(0, 10),
+          consultant: row['상담자'] || '',
+          channel: row['유입경로'] || '',
+          notes: row['상담내용'] || '',
+          decision: dm[row['결정여부']] || '',
+          followup: row['팔로업'] || ''
+        })).filter(r => r.name);
+        localStorage.setItem('firstConsultations', JSON.stringify(firstRecords));
+        const fp = document.getElementById('firstPanel');
+        if (fp && !fp.classList.contains('hidden')) renderFirstRecords();
+      }
+    } catch { console.log('1차상담 load failed'); }
+  }
+
+  function renderFirstRecords() {
+    const search = document.getElementById('firstSearch').value.toLowerCase();
+    const filter = document.getElementById('firstFilterDecision').value;
+    const list = document.getElementById('firstList');
+    const DL = {yes:'✅ 진행 결정',no:'❌ 미진행',pending:'⏳ 재연락 예정',thinking:'🤔 검토 중','':'미정'};
+    const DC = {yes:'db-yes',no:'db-no',pending:'db-pending',thinking:'db-thinking','':'db-'};
+    const COLORS = ['av-1','av-2','av-3','av-4','av-5','av-6','av-7','av-8'];
+    let filtered = firstRecords.filter(r =>
+      (!search || (r.name||'').toLowerCase().includes(search) || (r.phone||'').includes(search) || (r.notes||'').toLowerCase().includes(search)) &&
+      (!filter || r.decision === filter)
+    );
+    document.getElementById('firstCountBadge').textContent = filtered.length + '건';
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-state"><div class="ei">📝</div><p>${firstRecords.length === 0 ? '아직 등록된 1차 상담이 없습니다.' : '검색 결과가 없습니다.'}</p></div>`;
+      return;
+    }
+    list.innerHTML = filtered.map(r => {
+      const i = firstRecords.indexOf(r);
+      const av = COLORS[(r.name.charCodeAt(0)||0) % 8];
+      return `<div class="record-item" onclick="openFirstModal(${i})">
+        <div class="record-avatar ${av}">${r.name.charAt(0)}</div>
+        <div class="record-body">
+          <div class="record-name">${r.name}<span class="record-phone">${r.phone}</span></div>
+          <div class="record-tags">
+            ${r.date ? `<span class="rtag rtag-date">📅 ${r.date}</span>` : ''}
+            ${r.channel ? `<span class="rtag rtag-ch">📌 ${r.channel}</span>` : ''}
+            ${r.consultant ? `<span class="rtag rtag-co">👤 ${r.consultant}</span>` : ''}
+          </div>
+          ${r.notes ? `<div class="record-note">${r.notes}</div>` : ''}
+        </div>
+        <div class="record-right">
+          <div class="record-num">#${String(firstRecords.length - i).padStart(3,'0')}</div>
+          <div class="dec-badge ${DC[r.decision||'']}">${DL[r.decision||'']}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function openFirstModal(index) {
+    currentModalIndex = index;
+    const r = firstRecords[index];
+    const DL = {yes:'✅ 진행 결정',no:'❌ 미진행',pending:'⏳ 재연락 예정',thinking:'🤔 검토 중','':'미정'};
+    document.getElementById('modalName').textContent = r.name + ' 님 1차 상담 기록';
+    document.getElementById('modalBody').innerHTML = `
+      <div class="detail-row"><div class="detail-label">이름</div><div class="detail-value">${r.name}</div></div>
+      <div class="detail-row"><div class="detail-label">연락처</div><div class="detail-value">${r.phone}</div></div>
+      <div class="detail-row"><div class="detail-label">학년/나이</div><div class="detail-value">${r.grade||'미기재'}</div></div>
+      <div class="detail-row"><div class="detail-label">상담 일자</div><div class="detail-value">${r.date||'미기재'}</div></div>
+      <div class="detail-row"><div class="detail-label">상담자</div><div class="detail-value">${r.consultant||'미기재'}</div></div>
+      <div class="detail-row"><div class="detail-label">유입 경로</div><div class="detail-value">${r.channel||'미기재'}</div></div>
+      <div class="detail-row"><div class="detail-label">상담 내용</div><div class="detail-value" style="white-space:pre-wrap;">${r.notes||'없음'}</div></div>
+      <div class="detail-row"><div class="detail-label">결정 여부</div><div class="detail-value">${DL[r.decision||'']}</div></div>
+      <div class="detail-row"><div class="detail-label">팔로업</div><div class="detail-value">${r.followup||'없음'}</div></div>`;
+    document.getElementById('modalFooter').innerHTML = `
+      <button class="btn-danger" onclick="deleteFirstRecord(${index})">🗑 삭제</button>
+      <button class="btn-close-modal" onclick="closeModalDirect()">닫기</button>`;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  async function deleteFirstRecord(index) {
+    if (!confirm('이 1차 상담 기록을 삭제하시겠습니까?')) return;
+    const rec = firstRecords[index];
+    firstRecords.splice(index, 1);
+    localStorage.setItem('firstConsultations', JSON.stringify(firstRecords));
+    closeModalDirect();
+    renderFirstRecords();
+    showToast('🗑️ 삭제 중...');
+    try {
+      await fetch(SHEET_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', id: String(rec.id), sheetName: '1차상담' })
+      });
+      showToast('✅ 삭제 완료!');
+    } catch { showToast('⚠️ 로컬 삭제 완료.'); }
+  }
+  // ────────────────────────────────────────
+
   // ── 상담 신청 목록 ──
   let inquiries = [];
   let inquiryStatus = JSON.parse(localStorage.getItem('inquiryStatus') || '{}');
@@ -2066,6 +2199,12 @@ textarea { resize: vertical; min-height: 160px; }
       recordsPanel.classList.remove('hidden');
       document.getElementById('topbarTitle').textContent = '상담 기록 목록';
       document.getElementById('topBadge').textContent = records.length + '건';
+    } else if (v === 'first') {
+      document.getElementById('firstPanel').classList.remove('hidden');
+      document.getElementById('topbarTitle').textContent = '1차 상담 기록';
+      document.getElementById('topBadge').textContent = firstRecords.length + '건';
+      if (firstRecords.length) renderFirstRecords();
+      setTimeout(loadFirstRecords, 0);
     } else if (v === 'inquiry') {
       if (inquiryPanel) inquiryPanel.classList.remove('hidden');
       document.getElementById('topbarTitle').textContent = '상담 신청 목록';
