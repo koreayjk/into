@@ -1287,7 +1287,7 @@ textarea { resize: vertical; min-height: 160px; }
 </div>
 
 <script>
-  const PASSWORD = '2414';
+  const PASSWORD = 'immission2414!!AA';
 
   function checkLogin() {
     const saved = sessionStorage.getItem('into_auth');
@@ -1358,31 +1358,18 @@ textarea { resize: vertical; min-height: 160px; }
     const ch = document.getElementById('channel');
     ch.innerHTML = '<option value="">선택</option>' +
       admin.channels.map(c => `<option value="${c}">${c}</option>`).join('') +
-      '<option value="KCPA">KCPA</option><option value="학원">학원</option><option value="기타">기타</option>';
+      '<option value="기타">기타</option>';
   }
 
   function onChannelChange() {
-    const val = document.getElementById('channel').value;
-    const sub = document.getElementById('channelSub');
-    const admin = getAdminData();
-    if (val === 'KCPA') {
-      sub.style.display = 'block';
-      sub.innerHTML = '<option value="">KCPA 멤버 선택</option>' +
-        admin.kcpa.map(m => `<option value="KCPA - ${m}">${m}</option>`).join('');
-    } else if (val === '학원') {
-      sub.style.display = 'block';
-      sub.innerHTML = '<option value="">학원 멤버 선택</option>' +
-        admin.academy.map(m => `<option value="학원 - ${m}">${m}</option>`).join('');
-    } else {
-      sub.style.display = 'none';
-      sub.innerHTML = '';
-    }
+    document.getElementById('channelSub').style.display = 'none';
+    document.getElementById('channelSub').innerHTML = '';
   }
 
   function getChannelValue() {
     const main = document.getElementById('channel').value;
     const sub = document.getElementById('channelSub');
-    if ((main === 'KCPA' || main === '학원') && sub.style.display !== 'none' && sub.value) return sub.value;
+    return main;
     return main;
   }
 
@@ -1417,7 +1404,7 @@ textarea { resize: vertical; min-height: 160px; }
     if (!phone) { showToast('⚠️ 연락처를 입력해주세요.'); return; }
 
     const decisionLabel = { yes:'진행 결정', no:'미진행', pending:'재연락 예정', thinking:'검토 중', '':'미정' };
-    const record = { id: Date.now(), name, phone, date, consultant, channel, notes, followup, decision: selectedDecision };
+    const record = { id: Date.now(), name, phone, grade, date, consultant, channel, notes, followup, decision: selectedDecision };
 
     records.unshift(record);
     localStorage.setItem('intoConsultations', JSON.stringify(records));
@@ -1678,7 +1665,7 @@ textarea { resize: vertical; min-height: 160px; }
     const ch = document.getElementById('editChannel');
     ch.innerHTML = '<option value="">선택</option>' +
       admin.channels.map(c => `<option value="${c}">${c}</option>`).join('') +
-      '<option value="KCPA">KCPA</option><option value="학원">학원</option><option value="기타">기타</option>';
+      '<option value="기타">기타</option>';
 
     // fill values
     document.getElementById('editName').value = r.name || '';
@@ -1710,20 +1697,8 @@ textarea { resize: vertical; min-height: 160px; }
   }
 
   function onEditChannelChange() {
-    const val = document.getElementById('editChannel').value;
-    const sub = document.getElementById('editChannelSub');
-    const admin = getAdminData();
-    if (val === 'KCPA') {
-      sub.style.display = 'block';
-      sub.innerHTML = '<option value="">KCPA 멤버 선택</option>' +
-        admin.kcpa.map(m => `<option value="KCPA - ${m}">${m}</option>`).join('');
-    } else if (val === '학원') {
-      sub.style.display = 'block';
-      sub.innerHTML = '<option value="">학원 멤버 선택</option>' +
-        admin.academy.map(m => `<option value="학원 - ${m}">${m}</option>`).join('');
-    } else {
-      sub.style.display = 'none'; sub.innerHTML = '';
-    }
+    document.getElementById('editChannelSub').style.display = 'none';
+    document.getElementById('editChannelSub').innerHTML = '';
   }
 
   function selectEditDecision(el, val) {
@@ -1735,7 +1710,7 @@ textarea { resize: vertical; min-height: 160px; }
   function getEditChannelValue() {
     const main = document.getElementById('editChannel').value;
     const sub = document.getElementById('editChannelSub');
-    if ((main === 'KCPA' || main === '학원') && sub.style.display !== 'none' && sub.value) return sub.value;
+    return main;
     return main;
   }
 
@@ -2114,9 +2089,10 @@ textarea { resize: vertical; min-height: 160px; }
       const decisionMap = { '진행 결정':'yes', '검토 중':'thinking', '재연락 예정':'pending', '미진행':'no' };
 
       const loaded = sheetData.map(row => ({
-        id: Date.now() + Math.random(),
+        id: row['id'] || Date.now() + Math.random(),
         name: row['이름'] || '',
         phone: row['연락처'] || '',
+        grade: row['학년'] || '',
         date: row['상담일자'] || '',
         consultant: row['상담자'] || '',
         channel: row['유입경로'] || '',
