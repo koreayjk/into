@@ -1047,13 +1047,16 @@ textarea { resize: vertical; min-height: 160px; }
   <nav class="sidebar-nav">
     <div class="nav-label">메뉴</div>
     <div class="nav-item active" onclick="showView('form', this)">
-      <span class="icon">📋</span> 신규 상담 등록
+      <span class="icon">📋</span> 2차 상담 작성
+    </div>
+    <div class="nav-item" id="navFirst" onclick="showView('first', this)">
+      <span class="icon">📝</span> 1차 상담 기록
     </div>
     <div class="nav-item" onclick="showView('records', this)">
-      <span class="icon">📊</span> 상담 기록 목록
+      <span class="icon">📊</span> 2차 상담 기록
     </div>
     <div class="nav-item" onclick="showView('inquiry', this)">
-      <span class="icon">📩</span> 상담 신청 목록
+      <span class="icon">📩</span> 신규 상담 신청
       <span id="inquiryBadge" style="display:none;margin-left:auto;background:#ef4444;color:white;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;font-family:'DM Mono',monospace;"></span>
     </div>
     <div class="nav-label">설정</div>
@@ -1097,8 +1100,8 @@ textarea { resize: vertical; min-height: 160px; }
     <!-- FORM PANEL -->
     <div class="form-panel">
       <div class="form-panel-header">
-        <h2>신규 상담 등록</h2>
-        <p>새 상담 내용을 입력하세요</p>
+        <h2>2차 상담 작성</h2>
+        <p>2차 상담 내용을 입력하세요</p>
       </div>
 
       <div class="form-body">
@@ -2152,12 +2155,9 @@ textarea { resize: vertical; min-height: 160px; }
   function showView(v, el, fromTab) {
     // Sync sidebar nav
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    if (!fromTab) el.classList.add('active');
-    else {
-      const sideItems = document.querySelectorAll('.nav-item');
-      if (v === 'form' && sideItems[0]) sideItems[0].classList.add('active');
-      if (v === 'records' && sideItems[1]) sideItems[1].classList.add('active');
-    }
+    if (!fromTab && el) el.classList.add('active');
+    const navFirst = document.getElementById('navFirst');
+    if (v === 'first' && navFirst) navFirst.classList.add('active');
 
     // Sync bottom tabs
     document.querySelectorAll('.tab-item').forEach(t => {
@@ -2193,11 +2193,11 @@ textarea { resize: vertical; min-height: 160px; }
       formPanel.style.borderRight = 'none';
       if (formBody) { formBody.style.maxWidth = 'none'; formBody.style.margin = '0'; }
       if (formFooter) { formFooter.style.maxWidth = 'none'; formFooter.style.margin = '0'; formFooter.style.width = '100%'; }
-      document.getElementById('topbarTitle').textContent = '신규 상담 등록';
+      document.getElementById('topbarTitle').textContent = '2차 상담 작성';
       document.getElementById('topBadge').textContent = records.length + '건';
     } else if (v === 'records') {
       recordsPanel.classList.remove('hidden');
-      document.getElementById('topbarTitle').textContent = '상담 기록 목록';
+      document.getElementById('topbarTitle').textContent = '2차 상담 기록';
       document.getElementById('topBadge').textContent = records.length + '건';
     } else if (v === 'first') {
       document.getElementById('firstPanel').classList.remove('hidden');
@@ -2207,7 +2207,7 @@ textarea { resize: vertical; min-height: 160px; }
       setTimeout(loadFirstRecords, 0);
     } else if (v === 'inquiry') {
       if (inquiryPanel) inquiryPanel.classList.remove('hidden');
-      document.getElementById('topbarTitle').textContent = '상담 신청 목록';
+      document.getElementById('topbarTitle').textContent = '신규 상담 신청';
       document.getElementById('topBadge').textContent = inquiries.length + '건';
       // 캐시 데이터 즉시 표시 후 백그라운드 갱신
       if (inquiries.length) renderInquiries();
