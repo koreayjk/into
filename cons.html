@@ -2159,29 +2159,13 @@ textarea { resize: vertical; min-height: 160px; }
     const navFirst = document.getElementById('navFirst');
     if (v === 'first' && navFirst) navFirst.classList.add('active');
 
-    // Sync bottom tabs
-    document.querySelectorAll('.tab-item').forEach(t => {
-      t.classList.remove('active');
-      const wrap = t.querySelector('.tab-icon-wrap');
-      if (wrap) { wrap.style.background = ''; wrap.style.borderRadius = ''; wrap.style.padding = ''; }
-    });
-    const tabEl = v === 'form' ? document.getElementById('tabForm') : document.getElementById('tabRecords');
-    if (tabEl) {
-      tabEl.classList.add('active');
-      const wrap = tabEl.querySelector('.tab-icon-wrap');
-      if (wrap) { wrap.style.background = 'var(--sky-light)'; wrap.style.borderRadius = '10px'; wrap.style.padding = '4px 16px'; }
-    }
+    // 모든 패널 숨기기
+    document.querySelector('.form-panel').classList.add('hidden');
+    document.querySelectorAll('.records-panel').forEach(p => p.classList.add('hidden'));
 
     const formPanel = document.querySelector('.form-panel');
-    const recordsPanel = document.querySelector('.records-panel');
-    const inquiryPanel = document.getElementById('inquiryPanel');
     const formBody = document.querySelector('.form-body');
     const formFooter = document.querySelector('.form-footer');
-
-    // 모두 숨기기
-    formPanel.classList.add('hidden');
-    recordsPanel.classList.add('hidden');
-    if (inquiryPanel) inquiryPanel.classList.add('hidden');
     formPanel.style.width = '';
     formPanel.style.borderRight = '';
     if (formBody) { formBody.style.maxWidth = ''; formBody.style.margin = ''; }
@@ -2196,7 +2180,7 @@ textarea { resize: vertical; min-height: 160px; }
       document.getElementById('topbarTitle').textContent = '2차 상담 작성';
       document.getElementById('topBadge').textContent = records.length + '건';
     } else if (v === 'records') {
-      recordsPanel.classList.remove('hidden');
+      document.querySelector('.records-panel:not(#firstPanel):not(#inquiryPanel)').classList.remove('hidden');
       document.getElementById('topbarTitle').textContent = '2차 상담 기록';
       document.getElementById('topBadge').textContent = records.length + '건';
     } else if (v === 'first') {
@@ -2206,10 +2190,9 @@ textarea { resize: vertical; min-height: 160px; }
       if (firstRecords.length) renderFirstRecords();
       setTimeout(loadFirstRecords, 0);
     } else if (v === 'inquiry') {
-      if (inquiryPanel) inquiryPanel.classList.remove('hidden');
+      document.getElementById('inquiryPanel').classList.remove('hidden');
       document.getElementById('topbarTitle').textContent = '신규 상담 신청';
       document.getElementById('topBadge').textContent = inquiries.length + '건';
-      // 캐시 데이터 즉시 표시 후 백그라운드 갱신
       if (inquiries.length) renderInquiries();
       setTimeout(loadInquiries, 0);
     }
