@@ -1104,7 +1104,7 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="form-body">
         <div class="form-grid">
 
-          <div class="form-row">
+          <div class="form-row-3">
             <div class="fg">
               <label class="lbl">학생 이름</label>
               <input type="text" id="name" placeholder="홍길동">
@@ -1112,6 +1112,10 @@ textarea { resize: vertical; min-height: 160px; }
             <div class="fg">
               <label class="lbl">연락처</label>
               <input type="text" id="phone" placeholder="010-0000-0000">
+            </div>
+            <div class="fg">
+              <label class="lbl">학년/나이</label>
+              <input type="text" id="grade" placeholder="예: 고2, 대학교 1학년">
             </div>
           </div>
 
@@ -1402,6 +1406,7 @@ textarea { resize: vertical; min-height: 160px; }
   async function saveRecord() {
     const name = document.getElementById('name').value.trim();
     const phone = document.getElementById('phone').value.trim();
+    const grade = document.getElementById('grade').value.trim();
     const date = document.getElementById('date').value;
     const consultant = document.getElementById('consultant').value;
     const channel = getChannelValue();
@@ -1513,6 +1518,7 @@ textarea { resize: vertical; min-height: 160px; }
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row"><div class="detail-label">이름</div><div class="detail-value">${r.name}</div></div>
       <div class="detail-row"><div class="detail-label">연락처</div><div class="detail-value">${r.phone}</div></div>
+      <div class="detail-row"><div class="detail-label">학년/나이</div><div class="detail-value">${r.grade||'미기재'}</div></div>
       <div class="detail-row"><div class="detail-label">상담 일자</div><div class="detail-value">${r.date || '미기재'}</div></div>
       <div class="detail-row"><div class="detail-label">상담자</div><div class="detail-value">${r.consultant || '미기재'}</div></div>
       <div class="detail-row"><div class="detail-label">유입 경로</div><div class="detail-value">${r.channel || '미기재'}</div></div>
