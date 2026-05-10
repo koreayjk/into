@@ -224,9 +224,9 @@
   /* Add row */
   .add-row {
     display: flex;
+    flex-direction: column;
     gap: 8px;
     margin-top: 4px;
-    flex-wrap: wrap;
   }
 
   .add-row input {
@@ -244,7 +244,7 @@
   }
 
   .add-row input:focus { border-color: var(--teal); }
-  .add-row .btn { flex-shrink: 0; white-space: nowrap; }
+  .add-row .btn { width: 100%; }
 
   .btn {
     font-family: 'Noto Sans KR', sans-serif;
