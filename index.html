@@ -1439,7 +1439,7 @@ textarea { resize: vertical; min-height: 160px; }
   }
 
   function clearForm() {
-    ['name','phone','followup','notes'].forEach(id => document.getElementById(id).value = '');
+    ['name','phone','grade','followup','notes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('date').valueAsDate = new Date();
     document.getElementById('consultant').value = '';
     document.getElementById('channel').value = '';
