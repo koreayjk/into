@@ -1773,6 +1773,69 @@ textarea { resize: vertical; min-height: 160px; }
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
+  // ── 상담 신청 목록 ──
+  let inquiries = [];
+
+  async function loadInquiries() {
+    try {
+      const res = await fetch(SHEET_URL + '?type=inquiry&t=' + Date.now(), { redirect: 'follow' });
+      const data = await res.json();
+      if (Array.isArray(data)) { inquiries = data; renderInquiries(); }
+    } catch {
+      document.getElementById('inquiryList').innerHTML = '<div class="empty-state"><div class="ei">📩</div><p>데이터를 불러올 수 없습니다.</p></div>';
+    }
+  }
+
+  function renderInquiries() {
+    const search = document.getElementById('inquirySearch').value.toLowerCase();
+    const list = document.getElementById('inquiryList');
+    const filtered = inquiries.filter(r =>
+      !search ||
+      (r['이름']||'').toLowerCase().includes(search) ||
+      (r['연락처']||'').toLowerCase().includes(search) ||
+      (r['관심국가']||'').toLowerCase().includes(search) ||
+      (r['문의내용']||'').toLowerCase().includes(search)
+    );
+    document.getElementById('inquiryCount').textContent = filtered.length + '건';
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty-state"><div class="ei">📩</div><p>신청 내역이 없습니다.</p></div>';
+      return;
+    }
+    list.innerHTML = filtered.map((r, i) => `
+      <div class="record-item" onclick="openInquiryModal(${i})" style="cursor:pointer;">
+        <div class="record-avatar av-3">📩</div>
+        <div class="record-body">
+          <div class="record-name">${r['이름']||'-'} <span class="record-phone">${r['연락처']||r['카카오톡ID']||''}</span></div>
+          <div class="record-tags">
+            ${r['관심국가'] ? `<span class="rtag rtag-ch">🌏 ${r['관심국가']}</span>` : ''}
+            ${r['학년'] ? `<span class="rtag rtag-date">🎓 ${r['학년']}</span>` : ''}
+            ${r['카카오톡ID'] ? `<span class="rtag rtag-co">💬 ${r['카카오톡ID']}</span>` : ''}
+          </div>
+          ${r['문의내용'] ? `<div class="record-note">${r['문의내용']}</div>` : ''}
+        </div>
+        <div class="record-right">
+          <div class="record-num">${String(r['신청일시']||'').substring(0,10)}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function openInquiryModal(index) {
+    const r = inquiries[index];
+    document.getElementById('modalName').textContent = (r['이름']||'-') + ' 님 상담 신청';
+    document.getElementById('modalBody').innerHTML = `
+      <div class="detail-row"><div class="detail-label">이름</div><div class="detail-value">${r['이름']||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">연락처</div><div class="detail-value">${r['연락처']||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">카카오톡 ID</div><div class="detail-value">${r['카카오톡ID']||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">학년/나이</div><div class="detail-value">${r['학년']||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">관심 국가</div><div class="detail-value">${r['관심국가']||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">문의 내용</div><div class="detail-value" style="white-space:pre-wrap;">${r['문의내용']||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">개인정보 동의</div><div class="detail-value">${r['개인정보동의']||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">신청 일시</div><div class="detail-value">${r['신청일시']||'-'}</div></div>`;
+    document.getElementById('modalFooter').innerHTML = '<button class="btn-close-modal" onclick="closeModalDirect()">닫기</button>';
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  // ────────────────────────────────────────
+
   function showView(v, el, fromTab) {
     // Sync sidebar nav
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1824,7 +1887,7 @@ textarea { resize: vertical; min-height: 160px; }
     } else if (v === 'inquiry') {
       if (inquiryPanel) inquiryPanel.classList.remove('hidden');
       document.getElementById('topbarTitle').textContent = '상담 신청 목록';
-      loadInquiries();
+      setTimeout(loadInquiries, 0);
     }
   }
 
