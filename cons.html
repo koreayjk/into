@@ -1881,15 +1881,24 @@ textarea { resize: vertical; min-height: 160px; }
         const dm = {'진행 결정':'yes','검토 중':'thinking','재연락 예정':'pending','미진행':'no'};
         firstRecords = data.map(row => ({
           id: row['id'] || Date.now() + Math.random(),
-          name: row['이름'] || '',
-          phone: row['연락처'] || '',
+          name: (row['이름(한글)'] || row['이름'] || '') + (row['이름(영어)'] ? ' (' + row['이름(영어)'] + ')' : ''),
+          phone: row['전화번호'] || row['연락처'] || '',
           grade: row['학년'] || '',
           date: String(row['상담일자'] || '').substring(0, 10),
-          consultant: row['상담자'] || '',
+          consultant: row['작성자'] || '',
           channel: row['유입경로'] || '',
-          notes: row['상담내용'] || '',
+          notes: row['추가상담내용'] || row['유학목적'] || '',
           decision: dm[row['결정여부']] || '',
-          followup: row['팔로업'] || ''
+          followup: row['희망지역'] || '',
+          writer: row['작성자'] || '',
+          studyType: row['유학형태'] || '',
+          studyDate: row['유학시기'] || '',
+          englishLevel: row['영어수준'] || '',
+          testScore: row['시험점수'] || '',
+          purpose: row['유학목적'] || '',
+          region: row['희망지역'] || '',
+          email: row['이메일'] || '',
+          birth: row['생년월일'] || '',
         })).filter(r => r.name);
         localStorage.setItem('firstConsultations', JSON.stringify(firstRecords));
         const fp = document.getElementById('firstPanel');
@@ -1942,15 +1951,20 @@ textarea { resize: vertical; min-height: 160px; }
     const DL = {yes:'✅ 진행 결정',no:'❌ 미진행',pending:'⏳ 재연락 예정',thinking:'🤔 검토 중','':'미정'};
     document.getElementById('modalName').textContent = r.name + ' 님 1차 상담 기록';
     document.getElementById('modalBody').innerHTML = `
-      <div class="detail-row"><div class="detail-label">이름</div><div class="detail-value">${r.name}</div></div>
-      <div class="detail-row"><div class="detail-label">연락처</div><div class="detail-value">${r.phone}</div></div>
-      <div class="detail-row"><div class="detail-label">학년/나이</div><div class="detail-value">${r.grade||'미기재'}</div></div>
-      <div class="detail-row"><div class="detail-label">상담 일자</div><div class="detail-value">${r.date||'미기재'}</div></div>
-      <div class="detail-row"><div class="detail-label">상담자</div><div class="detail-value">${r.consultant||'미기재'}</div></div>
-      <div class="detail-row"><div class="detail-label">유입 경로</div><div class="detail-value">${r.channel||'미기재'}</div></div>
-      <div class="detail-row"><div class="detail-label">상담 내용</div><div class="detail-value" style="white-space:pre-wrap;">${r.notes||'없음'}</div></div>
-      <div class="detail-row"><div class="detail-label">결정 여부</div><div class="detail-value">${DL[r.decision||'']}</div></div>
-      <div class="detail-row"><div class="detail-label">팔로업</div><div class="detail-value">${r.followup||'없음'}</div></div>`;
+      <div class="detail-row"><div class="detail-label">작성자</div><div class="detail-value">${r.writer||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">이름</div><div class="detail-value">${r.name||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">전화번호</div><div class="detail-value">${r.phone||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">이메일</div><div class="detail-value">${r.email||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">생년월일</div><div class="detail-value">${r.birth||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">상담 일자</div><div class="detail-value">${r.date||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">유입 경로</div><div class="detail-value">${r.channel||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">유학 형태</div><div class="detail-value">${r.studyType||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">유학 시기</div><div class="detail-value">${r.studyDate||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">영어 수준</div><div class="detail-value">${r.englishLevel||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">시험 점수</div><div class="detail-value">${r.testScore||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">유학 목적</div><div class="detail-value" style="white-space:pre-wrap;">${r.purpose||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">희망 지역</div><div class="detail-value">${r.region||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">추가 상담</div><div class="detail-value" style="white-space:pre-wrap;">${r.notes||'-'}</div></div>`;
     document.getElementById('modalFooter').innerHTML = `
       <button class="btn-danger" onclick="deleteFirstRecord(${index})">🗑 삭제</button>
       <button class="btn-close-modal" onclick="closeModalDirect()">닫기</button>`;
