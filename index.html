@@ -1896,7 +1896,16 @@ textarea { resize: vertical; min-height: 160px; }
     try {
       const res = await fetch(SHEET_URL + '?type=inquiry&t=' + Date.now(), { redirect: 'follow' });
       const data = await res.json();
-      if (Array.isArray(data)) { inquiries = data; renderInquiries(); updateInquiryBadge(); }
+      if (Array.isArray(data)) {
+        inquiries = data;
+        renderInquiries();
+        updateInquiryBadge();
+        // 상담 신청 목록 뷰일 때 topBadge도 업데이트
+        const ip = document.getElementById('inquiryPanel');
+        if (ip && !ip.classList.contains('hidden')) {
+          document.getElementById('topBadge').textContent = inquiries.length + '건';
+        }
+      }
     } catch {
       const list = document.getElementById('inquiryList');
       if (list) list.innerHTML = '<div class="empty-state"><div class="ei">📩</div><p>데이터를 불러올 수 없습니다.</p></div>';
@@ -2077,12 +2086,15 @@ textarea { resize: vertical; min-height: 160px; }
       if (formBody) { formBody.style.maxWidth = 'none'; formBody.style.margin = '0'; }
       if (formFooter) { formFooter.style.maxWidth = 'none'; formFooter.style.margin = '0'; formFooter.style.width = '100%'; }
       document.getElementById('topbarTitle').textContent = '신규 상담 등록';
+      document.getElementById('topBadge').textContent = records.length + '건';
     } else if (v === 'records') {
       recordsPanel.classList.remove('hidden');
       document.getElementById('topbarTitle').textContent = '상담 기록 목록';
+      document.getElementById('topBadge').textContent = records.length + '건';
     } else if (v === 'inquiry') {
       if (inquiryPanel) inquiryPanel.classList.remove('hidden');
       document.getElementById('topbarTitle').textContent = '상담 신청 목록';
+      document.getElementById('topBadge').textContent = inquiries.length + '건';
       // 캐시 데이터 즉시 표시 후 백그라운드 갱신
       if (inquiries.length) renderInquiries();
       setTimeout(loadInquiries, 0);
