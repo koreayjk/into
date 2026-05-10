@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTO유학CENTER — 1차 상담</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f2a47;--navy2:#1a3f6f;--sky:#38bdf8;--sky-light:#e0f2fe;
+  --bg:#f0f4f8;--white:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;
+  --green:#16a34a;--green-bg:#dcfce7;--amber:#d97706;--amber-bg:#fef3c7;
+  --blue:#2563eb;--blue-bg:#dbeafe;--red:#dc2626;--red-bg:#fee2e2;
+}
+body{font-family:"Noto Sans KR",sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
+
+/* LOGIN */
+.login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#0f2a47,#1a3f6f);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.login-overlay.hidden{display:none}
+.login-card{background:white;border-radius:16px;overflow:hidden;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(15,42,71,.4)}
+.login-card-header{background:var(--navy);padding:28px 28px 22px;text-align:center}
+.login-card-header img{height:60px;width:auto;display:block;margin:0 auto 6px}
+.login-card-header p{font-size:10px;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase}
+.login-card-body{padding:28px}
+.login-card-body label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px}
+.login-input-wrap{position:relative;margin-bottom:16px}
+.login-input-wrap input{font-family:"Noto Sans KR",sans-serif;font-size:15px;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:12px 44px 12px 14px;outline:none;width:100%;transition:all .15s}
+.login-input-wrap input:focus{background:white;border-color:var(--sky);box-shadow:0 0 0 3px rgba(56,189,248,.12)}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted)}
+.login-error{color:#dc2626;font-size:12px;text-align:center;margin-bottom:12px;min-height:18px}
+.login-btn{font-family:"Noto Sans KR",sans-serif;font-size:14px;font-weight:700;padding:13px;border-radius:9px;background:var(--navy);color:white;border:none;cursor:pointer;width:100%}
+
+/* HEADER */
+.site-header{background:var(--navy);height:56px;display:flex;align-items:center;padding:0 20px;gap:12px}
+.site-header img{height:32px;width:auto}
+.site-header h1{color:white;font-size:15px;font-weight:700}
+.site-header a{margin-left:auto;color:rgba(255,255,255,.5);font-size:12px;text-decoration:none}
+.site-header a:hover{color:white}
+
+/* FORM */
+.page-wrap{max-width:780px;margin:28px auto;padding:0 16px 60px}
+
+.form-card{background:white;border-radius:14px;box-shadow:0 4px 24px rgba(15,42,71,.08);overflow:hidden;margin-bottom:20px}
+.form-card-header{background:var(--navy);padding:14px 20px;display:flex;align-items:center;gap:8px}
+.form-card-header h2{color:white;font-size:14px;font-weight:700}
+.form-card-header .icon{font-size:16px}
+.form-card-body{padding:20px}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row-1{margin-bottom:14px}
+.fg{display:flex;flex-direction:column;gap:5px}
+label.lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+input[type=text],input[type=date],input[type=email],select,textarea{
+  font-family:"Noto Sans KR",sans-serif;font-size:13px;color:var(--text);
+  background:var(--bg);border:1.5px solid var(--border);border-radius:8px;
+  padding:9px 12px;outline:none;transition:all .15s;width:100%;
+}
+input:focus,select:focus,textarea:focus{background:white;border-color:var(--sky);box-shadow:0 0 0 3px rgba(56,189,248,.12)}
+textarea{resize:vertical;min-height:100px}
+
+/* 체크박스 그룹 */
+.check-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.check-item{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);transition:all .15s}
+.check-item:hover{border-color:var(--sky)}
+.check-item input{width:15px;height:15px;accent-color:var(--navy);cursor:pointer}
+.check-item.selected{border-color:var(--navy);background:var(--sky-light);font-weight:600}
+
+/* 라디오 그룹 */
+.radio-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.radio-item{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);transition:all .15s}
+.radio-item:hover{border-color:var(--sky)}
+.radio-item input{width:15px;height:15px;accent-color:var(--navy);cursor:pointer}
+.radio-item.selected{border-color:var(--navy);background:var(--sky-light);font-weight:600}
+
+/* 영어수준 */
+.level-group{display:flex;gap:8px;margin-top:4px}
+.level-btn{font-family:"Noto Sans KR",sans-serif;font-size:13px;font-weight:500;padding:8px 20px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s}
+.level-btn:hover{border-color:var(--navy);color:var(--navy)}
+.level-btn.sel{background:var(--navy);border-color:var(--navy);color:white;font-weight:700}
+
+/* 저장 버튼 */
+.submit-wrap{display:flex;gap:10px;margin-top:8px}
+.btn-save{flex:1;font-family:"Noto Sans KR",sans-serif;font-size:15px;font-weight:700;padding:14px;border-radius:10px;background:var(--navy);color:white;border:none;cursor:pointer;transition:background .15s}
+.btn-save:hover{background:var(--navy2)}
+.btn-reset{font-family:"Noto Sans KR",sans-serif;font-size:13px;font-weight:500;padding:14px 20px;border-radius:10px;background:var(--bg);color:var(--muted);border:1.5px solid var(--border);cursor:pointer}
+
+/* 토스트 */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:white;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:500;border-left:4px solid var(--sky);transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:200}
+.toast.show{transform:translateY(0);opacity:1}
+
+@media(max-width:600px){
+  .form-row,.form-row-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-card-header">
+      <img src="https://koreayjk.github.io/into/intologo2.png" alt="인투유학">
+      <p>1차 상담 기록</p>
+    </div>
+    <div class="login-card-body">
+      <label>비밀번호</label>
+      <div class="login-input-wrap">
+        <input type="password" id="loginPw" placeholder="비밀번호를 입력하세요" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="toggle-pw" onclick="togglePw()">👁</button>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <button class="login-btn" onclick="doLogin()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<div class="site-header">
+  <img src="https://koreayjk.github.io/into/intologo2.png" alt="인투유학">
+  <h1>1차 상담 신청서</h1>
+  <a href="cons.html">← 상담 차트</a>
+</div>
+
+<div class="page-wrap">
+
+  <!-- 작성자 정보 -->
+  <div class="form-card">
+    <div class="form-card-header"><span class="icon">✍️</span><h2>작성자 정보</h2></div>
+    <div class="form-card-body">
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">작성자 유형</label>
+          <select id="writerType" onchange="onWriterTypeChange()">
+            <option value="">선택</option>
+            <option value="KCPA">KCPA</option>
+            <option value="MOU학원">MOU학원</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="lbl">작성자</label>
+          <select id="writerName">
+            <option value="">유형을 먼저 선택하세요</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">상담 실장</label>
+          <select id="consultant"></select>
+        </div>
+        <div class="fg">
+          <label class="lbl">상담 일자</label>
+          <input type="date" id="date">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 학생 정보 -->
+  <div class="form-card">
+    <div class="form-card-header"><span class="icon">🎓</span><h2>학생 정보</h2></div>
+    <div class="form-card-body">
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">학생 이름 (한글)</label>
+          <input type="text" id="nameKo" placeholder="홍길동">
+        </div>
+        <div class="fg">
+          <label class="lbl">학생 이름 (영어)</label>
+          <input type="text" id="nameEn" placeholder="Hong Gil Dong">
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="fg">
+          <label class="lbl">생년월일</label>
+          <input type="date" id="birth">
+        </div>
+        <div class="fg">
+          <label class="lbl">전화번호</label>
+          <input type="text" id="phone" placeholder="010-0000-0000">
+        </div>
+        <div class="fg">
+          <label class="lbl">이메일</label>
+          <input type="email" id="email" placeholder="example@email.com">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 관심 사항 -->
+  <div class="form-card">
+    <div class="form-card-header"><span class="icon">🌏</span><h2>관심 사항</h2></div>
+    <div class="form-card-body">
+      <div class="form-row-1">
+        <div class="fg">
+          <label class="lbl">우리 유학원을 알게 된 경로</label>
+          <div class="check-group" id="channelGroup">
+            <label class="check-item"><input type="checkbox" value="지인소개"> 지인소개</label>
+            <label class="check-item"><input type="checkbox" value="학원소개"> 학원소개</label>
+            <label class="check-item"><input type="checkbox" value="인터넷 검색"> 인터넷 검색</label>
+            <label class="check-item"><input type="checkbox" value="SNS"> SNS</label>
+            <label class="check-item"><input type="checkbox" value="기타"> 기타</label>
+          </div>
+          <input type="text" id="channelEtc" placeholder="SNS 종류 또는 기타 내용 입력..." style="margin-top:8px;display:none;">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">유학 형태</label>
+          <div class="check-group" id="typeGroup">
+            <label class="check-item"><input type="checkbox" value="해외유학"> 해외유학</label>
+            <label class="check-item"><input type="checkbox" value="캠프"> 캠프</label>
+            <label class="check-item"><input type="checkbox" value="조기유학"> 조기유학</label>
+            <label class="check-item"><input type="checkbox" value="어학연수"> 어학연수</label>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="lbl">유학 시기</label>
+          <input type="date" id="studyDate">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 상담 내용 -->
+  <div class="form-card">
+    <div class="form-card-header"><span class="icon">📋</span><h2>상담 내용</h2></div>
+    <div class="form-card-body">
+      <div class="form-row">
+        <div class="fg">
+          <label class="lbl">영어 수준</label>
+          <div class="level-group">
+            <button class="level-btn" onclick="selectLevel(this,'상')">상</button>
+            <button class="level-btn" onclick="selectLevel(this,'중')">중</button>
+            <button class="level-btn" onclick="selectLevel(this,'하')">하</button>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="lbl">공인 시험 점수 / 모의고사 성적</label>
+          <input type="text" id="testScore" placeholder="보유 시 기재 (예: TOEFL 90)">
+        </div>
+      </div>
+      <div class="form-row-1">
+        <div class="fg">
+          <label class="lbl">유학 목적</label>
+          <textarea id="purpose" placeholder="유학 목적을 입력해주세요"></textarea>
+        </div>
+      </div>
+      <div class="form-row-1">
+        <div class="fg">
+          <label class="lbl">희망 지역</label>
+          <input type="text" id="region" placeholder="희망하는 유학 지역을 입력해주세요">
+        </div>
+      </div>
+      <div class="form-row-1">
+        <div class="fg">
+          <label class="lbl">추가 상담 내용</label>
+          <textarea id="notes" placeholder="기타 문의 사항이나 상담 내용을 입력해주세요"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="submit-wrap">
+    <button class="btn-reset" onclick="clearForm()">초기화</button>
+    <button class="btn-save" onclick="saveRecord()">저장하기 →</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PASSWORD =  + PASSWORD + ;
+const SHEET_URL =  + SHEET_URL + ;
+
+// ── LOGIN ──
+function checkLogin(){if(sessionStorage.getItem('into_auth_cons1')==='ok')document.getElementById('loginOverlay').classList.add('hidden')}
+function doLogin(){
+  const pw=document.getElementById('loginPw').value;
+  if(pw===PASSWORD){sessionStorage.setItem('into_auth_cons1','ok');document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('loginError').textContent='';loadAdminData()}
+  else{document.getElementById('loginError').textContent='❌ 비밀번호가 틀렸습니다.';document.getElementById('loginPw').value='';document.getElementById('loginPw').focus()}
+}
+function togglePw(){const i=document.getElementById('loginPw');i.type=i.type==='password'?'text':'password'}
+checkLogin();
+
+// ── ADMIN DATA ──
+const DEFAULT = {
+  consultants: ['Moses Yu','스태프 A','스태프 B'],
+  kcpa: ['KCPA 멤버1','KCPA 멤버2','KCPA 멤버3','KCPA 멤버4','KCPA 멤버5'],
+  academy: ['학원1','학원2','학원3','학원4','학원5']
+};
+
+function getAdminData(){
+  return JSON.parse(localStorage.getItem('admin_settings')||'null') || DEFAULT;
+}
+
+async function loadAdminData(){
+  try{
+    const res=await fetch(SHEET_URL+'?type=admin&t='+Date.now(),{redirect:'follow'});
+    const data=await res.json();
+    if(data&&data.consultants){localStorage.setItem('admin_settings',JSON.stringify(data));}
+  }catch(e){}
+  populateSelects();
+}
+
+function populateSelects(){
+  const a=getAdminData();
+  const c=document.getElementById('consultant');
+  c.innerHTML='<option value="">선택</option>'+a.consultants.map(x=>`<option value="${x}">${x}</option>`).join('');
+}
+
+function onWriterTypeChange(){
+  const type=document.getElementById('writerType').value;
+  const a=getAdminData();
+  const sel=document.getElementById('writerName');
+  if(type==='KCPA'){
+    sel.innerHTML='<option value="">KCPA 선택</option>'+(a.kcpa||DEFAULT.kcpa).map(x=>`<option value="${x}">${x}</option>`).join('');
+  } else if(type==='MOU학원'){
+    sel.innerHTML='<option value="">학원 선택</option>'+(a.academy||DEFAULT.academy).map(x=>`<option value="${x}">${x}</option>`).join('');
+  } else {
+    sel.innerHTML='<option value="">유형을 먼저 선택하세요</option>';
+  }
+}
+
+// ── CHECKBOX ──
+document.querySelectorAll('.check-item').forEach(item=>{
+  item.addEventListener('click',function(e){
+    if(e.target.tagName==='INPUT') return;
+    const cb=this.querySelector('input');
+    cb.checked=!cb.checked;
+    this.classList.toggle('selected',cb.checked);
+  });
+});
+document.querySelectorAll('.check-item input').forEach(cb=>{
+  cb.addEventListener('change',function(){
+    this.closest('.check-item').classList.toggle('selected',this.checked);
+    // SNS/기타 입력창
+    const etc=document.getElementById('channelEtc');
+    if(etc){
+      const hasSNS=document.querySelector('#channelGroup input[value="SNS"]').checked;
+      const hasEtc=document.querySelector('#channelGroup input[value="기타"]').checked;
+      etc.style.display=(hasSNS||hasEtc)?'block':'none';
+    }
+  });
+});
+
+// ── LEVEL ──
+let selectedLevel='';
+function selectLevel(el,val){
+  selectedLevel=val;
+  document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// ── SAVE ──
+async function saveRecord(){
+  const writerType=document.getElementById('writerType').value;
+  const writerName=document.getElementById('writerName').value;
+  const consultant=document.getElementById('consultant').value;
+  const date=document.getElementById('date').value;
+  const nameKo=document.getElementById('nameKo').value.trim();
+  const nameEn=document.getElementById('nameEn').value.trim();
+  const birth=document.getElementById('birth').value;
+  const phone=document.getElementById('phone').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const studyDate=document.getElementById('studyDate').value;
+  const testScore=document.getElementById('testScore').value.trim();
+  const purpose=document.getElementById('purpose').value.trim();
+  const region=document.getElementById('region').value.trim();
+  const notes=document.getElementById('notes').value.trim();
+  const channelEtc=document.getElementById('channelEtc').value.trim();
+
+  const channels=[...document.querySelectorAll('#channelGroup input:checked')].map(c=>c.value).join(', ')+(channelEtc?` (${channelEtc})`:'');
+  const studyTypes=[...document.querySelectorAll('#typeGroup input:checked')].map(c=>c.value).join(', ');
+
+  if(!nameKo){showToast('⚠️ 학생 이름(한글)을 입력해주세요.');return}
+  if(!phone){showToast('⚠️ 전화번호를 입력해주세요.');return}
+
+  const record={
+    id: Date.now(),
+    writer: writerType+(writerName?' - '+writerName:''),
+    consultant, date,
+    name: nameKo+(nameEn?' ('+nameEn+')':''),
+    nameKo, nameEn, birth, phone, email,
+    channel: channels,
+    studyType: studyTypes,
+    studyDate,
+    englishLevel: selectedLevel,
+    testScore, purpose, region, notes,
+    sheetName: '1차상담'
+  };
+
+  showToast('💾 저장 중...');
+  try{
+    await fetch(SHEET_URL,{
+      method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(record)
+    });
+    showToast('✅ 저장 완료!');
+    clearForm();
+  }catch{showToast('⚠️ 저장 실패. 다시 시도해주세요.')}
+}
+
+function clearForm(){
+  ['nameKo','nameEn','phone','email','testScore','purpose','region','notes'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.value='';
+  });
+  document.getElementById('date').valueAsDate=new Date();
+  document.getElementById('birth').value='';
+  document.getElementById('studyDate').value='';
+  document.getElementById('consultant').value='';
+  document.getElementById('writerType').value='';
+  document.getElementById('writerName').innerHTML='<option value="">유형을 먼저 선택하세요</option>';
+  document.querySelectorAll('.check-item input').forEach(cb=>{cb.checked=false;cb.closest('.check-item').classList.remove('selected')});
+  document.getElementById('channelEtc').style.display='none';
+  document.getElementById('channelEtc').value='';
+  document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('sel'));
+  selectedLevel='';
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
+
+// init
+document.getElementById('date').valueAsDate=new Date();
+if(sessionStorage.getItem('into_auth_cons1')==='ok') loadAdminData();
+</script>
+</body>
+</html>
