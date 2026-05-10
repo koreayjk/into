@@ -1513,7 +1513,13 @@ textarea { resize: vertical; min-height: 160px; }
   }
 
   function closeModal(e) { if (e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
-  function closeModalDirect() { document.getElementById('modalOverlay').classList.remove('open'); currentModalIndex = -1; }
+  function closeModalDirect() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    currentModalIndex = -1;
+    // 버튼 복원
+    const btns = document.querySelectorAll('.modal-footer button, .modal-footer .btn-danger, .modal-footer .btn-pdf');
+    btns.forEach(b => b.style.display = '');
+  }
 
   async function deleteRecord() {
     if (currentModalIndex < 0) return;
