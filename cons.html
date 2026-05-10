@@ -1051,6 +1051,7 @@ textarea { resize: vertical; min-height: 160px; }
     </div>
     <div class="nav-item" id="navFirst" onclick="showView('first', this)">
       <span class="icon">📝</span> 1차 상담 기록
+      <span id="firstBadge" style="display:none;margin-left:auto;background:#ef4444;color:white;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;font-family:'DM Mono',monospace;"></span>
     </div>
     <div class="nav-item" onclick="showView('records', this)">
       <span class="icon">📊</span> 2차 상담 기록
@@ -1090,7 +1091,7 @@ textarea { resize: vertical; min-height: 160px; }
     </div>
     <div class="topbar-actions">
       <button class="btn btn-ghost" onclick="exportData()">📥 CSV</button>
-      <button class="btn btn-ghost" onclick="handlePDFExport()">📄 PDF 출력</button>
+      <button class="btn btn-ghost" id="pdfExportBtn" onclick="handlePDFExport()">📄 PDF 출력</button>
     </div>
   </div>
 
@@ -1538,6 +1539,11 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="detail-row"><div class="detail-label">상담 내용</div><div class="detail-value" style="white-space:pre-wrap;">${r.notes || '없음'}</div></div>
       <div class="detail-row"><div class="detail-label">결정 여부</div><div class="detail-value">${dlabel[r.decision || '']}</div></div>
       <div class="detail-row"><div class="detail-label">팔로업</div><div class="detail-value">${r.followup || '없음'}</div></div>`;
+    document.getElementById('modalFooter').innerHTML = `
+      <button class="btn-danger" onclick="deleteRecord()">🗑 삭제</button>
+      <button class="btn-pdf" onclick="exportSinglePDF()">📄 PDF</button>
+      <button class="btn-pdf" style="background:var(--green-bg);color:var(--green);border-color:#86efac;" onclick="openEditModal()">✏️ 수정</button>
+      <button class="btn-close-modal" onclick="closeModalDirect()">닫기</button>`;
     document.getElementById('modalOverlay').classList.add('open');
   }
 
@@ -1787,11 +1793,87 @@ textarea { resize: vertical; min-height: 160px; }
   // 현재 뷰에 따라 PDF 출력 분기
   function handlePDFExport() {
     const ip = document.getElementById('inquiryPanel');
+    const fp = document.getElementById('firstPanel');
     if (ip && !ip.classList.contains('hidden')) {
       exportInquiryPDF();
+    } else if (fp && !fp.classList.contains('hidden')) {
+      exportFirstPDF();
     } else {
       exportPDF();
     }
+  }
+
+  // 1차 상담 전체 목록 PDF
+  function exportFirstPDF() {
+    if (!firstRecords.length) { showToast('⚠️ 출력할 1차 상담 기록이 없습니다.'); return; }
+    const today = new Date().toLocaleDateString('ko-KR');
+    const rows = firstRecords.map((r, i) => `<tr>
+      <td class="num">#${String(i+1).padStart(3,'0')}</td>
+      <td><strong>${r.name||'-'}</strong><br><span class="sub">${r.phone||''}</span></td>
+      <td>${r.writer||'-'}</td>
+      <td>${r.date||'-'}</td>
+      <td>${r.channel||'-'}</td>
+      <td>${r.studyType||'-'}</td>
+      <td>${r.englishLevel||'-'}</td>
+      <td class="nc">${r.purpose||'-'}</td>
+      <td>${r.region||'-'}</td>
+    </tr>`).join('');
+    buildPrintWindow(\`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans CJK KR","NanumGothic",sans-serif;font-size:10px;color:#0f172a;padding:24px}
+    .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5px solid #0f2a47;padding-bottom:10px;margin-bottom:18px}
+    .logo-box{background:#0f2a47;padding:6px 14px;border-radius:6px}.logo-box img{height:32px;width:auto;display:block}
+    table{width:100%;border-collapse:collapse;font-size:9px}thead tr{background:#0f2a47;color:white}
+    thead th{padding:7px 6px;text-align:left;font-size:8.5px}tbody tr:nth-child(even){background:#f8fafc}
+    td{padding:7px 6px;border-bottom:1px solid #e2e8f0;vertical-align:top}
+    .num{font-family:monospace;color:#94a3b8}.sub{color:#94a3b8;font-size:8px}.nc{max-width:120px;word-break:break-all}
+    .ft{margin-top:16px;display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:8px}
+    @media print{@page{margin:15mm;size:A4 landscape}body{padding:0}}</style></head><body>
+    <div class="hd"><div class="logo-box"><img src="https://koreayjk.github.io/into/intologo2.png" alt="인투유학"></div>
+    <p>1차 상담 기록 · 총 \${firstRecords.length}건 · \${today}</p></div>
+    <table><thead><tr><th>번호</th><th>이름/연락처</th><th>작성자</th><th>상담일자</th><th>유입경로</th><th>유학형태</th><th>영어수준</th><th>유학목적</th><th>희망지역</th></tr></thead>
+    <tbody>\${rows}</tbody></table>
+    <div class="ft"><span>INTO유학CENTER · 1차 상담 기록</span><span>\${today}</span></div></body></html>\`);
+  }
+
+  // 1차 상담 개인 PDF
+  function exportFirstSinglePDF(index) {
+    const r = firstRecords[index !== undefined ? index : currentFirstIndex];
+    if (!r) return;
+    const today = new Date().toLocaleDateString('ko-KR');
+    buildPrintWindow(\`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans CJK KR",sans-serif;color:#0f172a;padding:40px;max-width:580px;margin:0 auto}
+    .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0f2a47;padding-bottom:12px;margin-bottom:8px}
+    .logo-box{background:#0f2a47;padding:6px 14px;border-radius:6px}.logo-box img{height:32px;width:auto;display:block}
+    .bar{height:4px;background:linear-gradient(90deg,#0f2a47,#38bdf8);border-radius:2px;margin-bottom:24px}
+    .title{font-size:16px;font-weight:700;margin-bottom:20px;padding-bottom:10px;border-bottom:1px dashed #e2e8f0}
+    .grid{display:grid;grid-template-columns:120px 1fr;gap:0}
+    .lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;padding:10px 0;border-bottom:1px solid #f1f5f9;padding-right:12px}
+    .val{font-size:13px;color:#0f172a;padding:10px 0;border-bottom:1px solid #f1f5f9;line-height:1.6}
+    .ft{margin-top:28px;display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:10px}
+    @media print{@page{margin:20mm;size:A4}body{padding:0}}</style></head><body>
+    <div class="top"><div class="logo-box"><img src="https://koreayjk.github.io/into/intologo2.png" alt="인투유학"></div>
+    <span style="font-size:11px;color:#94a3b8;">\${today}</span></div>
+    <div class="bar"></div>
+    <div class="title">📋 \${r.name||'-'} 님 1차 상담 신청서</div>
+    <div class="grid">
+      <div class="lbl">작성자</div><div class="val">\${r.writer||'-'}</div>
+      <div class="lbl">이름</div><div class="val">\${r.name||'-'}</div>
+      <div class="lbl">전화번호</div><div class="val">\${r.phone||'-'}</div>
+      <div class="lbl">이메일</div><div class="val">\${r.email||'-'}</div>
+      <div class="lbl">생년월일</div><div class="val">\${r.birth||'-'}</div>
+      <div class="lbl">상담 일자</div><div class="val">\${r.date||'-'}</div>
+      <div class="lbl">유입 경로</div><div class="val">\${r.channel||'-'}</div>
+      <div class="lbl">유학 형태</div><div class="val">\${r.studyType||'-'}</div>
+      <div class="lbl">유학 시기</div><div class="val">\${r.studyDate||'-'}</div>
+      <div class="lbl">영어 수준</div><div class="val">\${r.englishLevel||'-'}</div>
+      <div class="lbl">시험 점수</div><div class="val">\${r.testScore||'-'}</div>
+      <div class="lbl">유학 목적</div><div class="val">\${(r.purpose||'-').replace(/\n/g,'<br>')}</div>
+      <div class="lbl">희망 지역</div><div class="val">\${r.region||'-'}</div>
+      <div class="lbl">추가 상담</div><div class="val">\${(r.notes||'-').replace(/\n/g,'<br>')}</div>
+    </div>
+    <div class="ft"><span>INTO유학CENTER · 1차 상담 신청서</span><span>\${today}</span></div></body></html>\`);
   }
 
   // 상담신청 전체 목록 PDF
@@ -1868,6 +1950,16 @@ textarea { resize: vertical; min-height: 160px; }
 
   // ── 1차 상담 기록 ──
   let firstRecords = JSON.parse(localStorage.getItem('firstConsultations') || '[]');
+  let firstStatus = JSON.parse(localStorage.getItem('firstStatus') || '{}');
+  let currentFirstIndex = -1;
+
+  function updateFirstBadge() {
+    const pending = firstRecords.filter(r => (firstStatus[r.id] || '대기중') === '대기중').length;
+    const badge = document.getElementById('firstBadge');
+    if (!badge) return;
+    if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-block'; }
+    else { badge.style.display = 'none'; }
+  }
 
   async function loadFirstRecords(silent = false) {
     if (!silent && !firstRecords.length) {
@@ -1901,6 +1993,7 @@ textarea { resize: vertical; min-height: 160px; }
           birth: row['생년월일'] || '',
         })).filter(r => r.name);
         localStorage.setItem('firstConsultations', JSON.stringify(firstRecords));
+        updateFirstBadge();
         const fp = document.getElementById('firstPanel');
         if (fp && !fp.classList.contains('hidden')) renderFirstRecords();
       }
@@ -1926,23 +2019,35 @@ textarea { resize: vertical; min-height: 160px; }
     list.innerHTML = filtered.map(r => {
       const i = firstRecords.indexOf(r);
       const av = COLORS[(r.name.charCodeAt(0)||0) % 8];
+      const fStatus = firstStatus[r.id] || '대기중';
+      const fDone = fStatus === '처리완료';
       return `<div class="record-item" onclick="openFirstModal(${i})">
-        <div class="record-avatar ${av}">${r.name.charAt(0)}</div>
+        <div class="record-avatar ${av}" style="${fDone?'background:#16a34a':''}">${r.name.charAt(0)}</div>
         <div class="record-body">
           <div class="record-name">${r.name}<span class="record-phone">${r.phone}</span></div>
           <div class="record-tags">
             ${r.date ? `<span class="rtag rtag-date">📅 ${r.date}</span>` : ''}
-            ${r.channel ? `<span class="rtag rtag-ch">📌 ${r.channel}</span>` : ''}
-            ${r.consultant ? `<span class="rtag rtag-co">👤 ${r.consultant}</span>` : ''}
+            ${r.writer ? `<span class="rtag rtag-co">✍️ ${r.writer}</span>` : ''}
           </div>
-          ${r.notes ? `<div class="record-note">${r.notes}</div>` : ''}
+          ${r.purpose||r.notes ? `<div class="record-note">${r.purpose||r.notes}</div>` : ''}
         </div>
         <div class="record-right">
           <div class="record-num">#${String(firstRecords.length - i).padStart(3,'0')}</div>
-          <div class="dec-badge ${DC[r.decision||'']}">${DL[r.decision||'']}</div>
+          <div class="dec-badge ${fDone?'db-yes':'db-'}" style="cursor:pointer;" onclick="event.stopPropagation();toggleFirstStatus(${i})">
+            ${fDone ? '✅ 처리완료' : '⏳ 대기중'}
+          </div>
         </div>
       </div>`;
     }).join('');
+    updateFirstBadge();
+  }
+
+  function toggleFirstStatus(index) {
+    const r = firstRecords[index];
+    const key = r.id;
+    firstStatus[key] = (firstStatus[key] || '대기중') === '대기중' ? '처리완료' : '대기중';
+    localStorage.setItem('firstStatus', JSON.stringify(firstStatus));
+    renderFirstRecords();
   }
 
   function openFirstModal(index) {
@@ -1965,10 +2070,63 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="detail-row"><div class="detail-label">유학 목적</div><div class="detail-value" style="white-space:pre-wrap;">${r.purpose||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">희망 지역</div><div class="detail-value">${r.region||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">추가 상담</div><div class="detail-value" style="white-space:pre-wrap;">${r.notes||'-'}</div></div>`;
+    currentFirstIndex = index;
+    const fStat = firstStatus[r.id] || '대기중';
+    const fDone = fStat === '처리완료';
     document.getElementById('modalFooter').innerHTML = `
       <button class="btn-danger" onclick="deleteFirstRecord(${index})">🗑 삭제</button>
+      <button class="btn-pdf" onclick="exportFirstSinglePDF(${index})">📄 PDF</button>
+      <button class="btn-pdf" style="background:var(--green-bg);color:var(--green);border-color:#86efac;" onclick="openFirstEditModal(${index})">✏️ 수정</button>
+      <button class="${fDone?'btn-danger':'btn-sky'}" style="${fDone?'':'background:var(--green);color:white;border:none;'}font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:700;padding:8px 14px;border-radius:7px;cursor:pointer;"
+        onclick="toggleFirstStatusModal(${index})">
+        ${fDone ? '↩️ 대기중으로' : '✅ 처리완료'}
+      </button>
       <button class="btn-close-modal" onclick="closeModalDirect()">닫기</button>`;
     document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function toggleFirstStatusModal(index) {
+    const r = firstRecords[index];
+    firstStatus[r.id] = (firstStatus[r.id] || '대기중') === '대기중' ? '처리완료' : '대기중';
+    localStorage.setItem('firstStatus', JSON.stringify(firstStatus));
+    updateFirstBadge();
+    closeModalDirect();
+    setTimeout(() => openFirstModal(index), 50);
+    renderFirstRecords();
+  }
+
+  function openFirstEditModal(index) {
+    const r = firstRecords[index];
+    currentFirstIndex = index;
+    // edit 모달 재활용
+    document.getElementById('editName').value = r.name || '';
+    document.getElementById('editPhone').value = r.phone || '';
+    document.getElementById('editDate').value = r.date || '';
+    document.getElementById('editNotes').value = r.purpose || r.notes || '';
+    document.getElementById('editFollowup').value = r.region || '';
+    document.getElementById('editConsultant').innerHTML = `<option value="${r.writer||''}">${r.writer||'작성자'}</option>`;
+    document.getElementById('editChannel').innerHTML = `<option value="${r.channel||''}">${r.channel||'유입경로'}</option>`;
+    // 저장 버튼 변경
+    const saveBtn = document.querySelector('#editModalOverlay .btn-save');
+    saveBtn.onclick = () => saveFirstEdit(index);
+    document.getElementById('editModalOverlay').classList.add('open');
+  }
+
+  async function saveFirstEdit(index) {
+    const r = firstRecords[index];
+    firstRecords[index] = {
+      ...r,
+      name: document.getElementById('editName').value.trim(),
+      phone: document.getElementById('editPhone').value.trim(),
+      date: document.getElementById('editDate').value,
+      purpose: document.getElementById('editNotes').value.trim(),
+      notes: document.getElementById('editNotes').value.trim(),
+      region: document.getElementById('editFollowup').value.trim(),
+    };
+    localStorage.setItem('firstConsultations', JSON.stringify(firstRecords));
+    document.getElementById('editModalOverlay').classList.remove('open');
+    renderFirstRecords();
+    showToast('✅ 수정 완료!');
   }
 
   async function deleteFirstRecord(index) {
