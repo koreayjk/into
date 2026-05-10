@@ -344,9 +344,7 @@ async function loadAdminData(){
 }
 
 function populateSelects(){
-  const a=getAdminData();
-  const c=document.getElementById('consultant');
-  c.innerHTML='<option value="">선택</option>'+a.consultants.map(x=>`<option value="${x}">${x}</option>`).join('');
+  // consultant 필드 없음 (cons1에서 제거됨)
 }
 
 function onWriterTypeChange(){
@@ -396,7 +394,7 @@ function selectLevel(el,val){
 async function saveRecord(){
   const writerType=document.getElementById('writerType').value;
   const writerName=document.getElementById('writerName').value;
-  const consultant=document.getElementById('consultant').value;
+  const consultant='';
   const date=document.getElementById('date').value;
   const nameKo=document.getElementById('nameKo').value.trim();
   const nameEn=document.getElementById('nameEn').value.trim();
@@ -450,7 +448,7 @@ function clearForm(){
   document.getElementById('date').valueAsDate=new Date();
   document.getElementById('birth').value='';
   document.getElementById('studyDate').value='';
-  document.getElementById('consultant').value='';
+
   document.getElementById('writerType').value='';
   document.getElementById('writerName').innerHTML='<option value="">유형을 먼저 선택하세요</option>';
   document.querySelectorAll('.check-item input').forEach(cb=>{cb.checked=false;cb.closest('.check-item').classList.remove('selected')});
