@@ -15,6 +15,41 @@
 }
 body{font-family:"Noto Sans KR",sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
 
+/* HERO */
+.hero-section{
+  background:linear-gradient(135deg,#0f2a47 0%,#1a3f6f 60%,#0e3460 100%);
+  padding:40px 20px 48px;
+  text-align:center;
+  position:relative;
+}
+.hero-inner{max-width:640px;margin:0 auto;}
+.hero-logo{height:64px;width:auto;display:block;margin:0 auto 20px;}
+.hero-title{
+  font-size:32px;font-weight:900;color:white;line-height:1.35;
+  letter-spacing:-0.5px;margin-bottom:14px;
+}
+.hero-title em{color:var(--sky);font-style:normal;}
+.hero-sub{
+  font-size:15px;color:rgba(255,255,255,0.7);
+  line-height:1.8;margin-bottom:24px;
+}
+.hero-badges{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;}
+.hbadge{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);
+  color:rgba(255,255,255,0.85);padding:7px 16px;border-radius:20px;
+  font-size:13px;font-weight:500;
+}
+.hero-back{
+  position:absolute;top:16px;right:20px;
+  color:rgba(255,255,255,0.45);font-size:12px;text-decoration:none;
+  background:rgba(255,255,255,0.08);padding:5px 12px;border-radius:20px;
+  transition:all .15s;
+}
+.hero-back:hover{color:white;background:rgba(255,255,255,0.15);}
+
+/* page-wrap 위 마진 줄이기 */
+.page-wrap{max-width:780px;margin:0px auto;padding:24px 16px 60px;}
+
 /* LOGIN */
 .login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#0f2a47,#1a3f6f);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
 .login-overlay.hidden{display:none}
@@ -115,10 +150,19 @@ textarea{resize:vertical;min-height:100px}
   </div>
 </div>
 
-<div class="site-header">
-  <img src="https://koreayjk.github.io/into/intologo2.png" alt="인투유학">
-  <h1>1차 상담 신청서</h1>
-  <a href="cons.html">← 상담 차트</a>
+<!-- HERO -->
+<div class="hero-section">
+  <div class="hero-inner">
+    <img src="https://koreayjk.github.io/into/intologo2.png" alt="인투유학" class="hero-logo">
+    <h1 class="hero-title">함께 만들어가는<br><em>유학의 첫 걸음</em></h1>
+    <p class="hero-sub">파트너 선생님의 한 장의 상담서가<br>학생의 꿈을 현실로 바꿉니다.</p>
+    <div class="hero-badges">
+      <span class="hbadge">🤝 파트너 전용 시스템</span>
+      <span class="hbadge">📋 1차 상담 신청서</span>
+      <span class="hbadge">✈️ 유학 전문 컨설팅</span>
+    </div>
+  </div>
+  <a href="cons.html" class="hero-back">← 상담 차트로</a>
 </div>
 
 <div class="page-wrap">
