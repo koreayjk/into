@@ -1818,7 +1818,7 @@ textarea { resize: vertical; min-height: 160px; }
       <td class="nc">${r.purpose||'-'}</td>
       <td>${r.region||'-'}</td>
     </tr>`).join('');
-    buildPrintWindow(\`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+    buildPrintWindow(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans CJK KR","NanumGothic",sans-serif;font-size:10px;color:#0f172a;padding:24px}
     .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5px solid #0f2a47;padding-bottom:10px;margin-bottom:18px}
@@ -1833,7 +1833,7 @@ textarea { resize: vertical; min-height: 160px; }
     <p>1차 상담 기록 · 총 \${firstRecords.length}건 · \${today}</p></div>
     <table><thead><tr><th>번호</th><th>이름/연락처</th><th>작성자</th><th>상담일자</th><th>유입경로</th><th>유학형태</th><th>영어수준</th><th>유학목적</th><th>희망지역</th></tr></thead>
     <tbody>\${rows}</tbody></table>
-    <div class="ft"><span>INTO유학CENTER · 1차 상담 기록</span><span>\${today}</span></div></body></html>\`);
+    <div class="ft"><span>INTO유학CENTER · 1차 상담 기록</span><span>\${today}</span></div></body></html>`);
   }
 
   // 1차 상담 개인 PDF
@@ -1841,7 +1841,7 @@ textarea { resize: vertical; min-height: 160px; }
     const r = firstRecords[index !== undefined ? index : currentFirstIndex];
     if (!r) return;
     const today = new Date().toLocaleDateString('ko-KR');
-    buildPrintWindow(\`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+    buildPrintWindow(`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
     <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans CJK KR",sans-serif;color:#0f172a;padding:40px;max-width:580px;margin:0 auto}
     .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #0f2a47;padding-bottom:12px;margin-bottom:8px}
@@ -1873,7 +1873,7 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="lbl">희망 지역</div><div class="val">\${r.region||'-'}</div>
       <div class="lbl">추가 상담</div><div class="val">\${(r.notes||'-').replace(/\n/g,'<br>')}</div>
     </div>
-    <div class="ft"><span>INTO유학CENTER · 1차 상담 신청서</span><span>\${today}</span></div></body></html>\`);
+    <div class="ft"><span>INTO유학CENTER · 1차 상담 신청서</span><span>\${today}</span></div></body></html>`);
   }
 
   // 상담신청 전체 목록 PDF
