@@ -1875,7 +1875,7 @@ textarea { resize: vertical; min-height: 160px; }
       if (list) list.innerHTML = '<div class="empty-state"><div class="ei">⏳</div><p>불러오는 중...</p></div>';
     }
     try {
-      const res = await fetch(SHEET_URL + '?sheet=1차상담&t=' + Date.now(), { redirect: 'follow' });
+      const res = await fetch(SHEET_URL + '?sheet=First&t=' + Date.now(), { redirect: 'follow' });
       const data = await res.json();
       if (Array.isArray(data) && data.length) {
         const dm = {'진행 결정':'yes','검토 중':'thinking','재연락 예정':'pending','미진행':'no'};
@@ -1969,7 +1969,7 @@ textarea { resize: vertical; min-height: 160px; }
       await fetch(SHEET_URL, {
         method: 'POST', mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', id: String(rec.id), sheetName: '1차상담' })
+        body: JSON.stringify({ action: 'delete', id: String(rec.id), sheetName: 'First' })
       });
       showToast('✅ 삭제 완료!');
     } catch { showToast('⚠️ 로컬 삭제 완료.'); }
@@ -2245,10 +2245,10 @@ textarea { resize: vertical; min-height: 160px; }
           ...r,
           date: r.date ? String(r.date).substring(0, 10) : ''
         }));
+        // Sheets 데이터로 완전히 교체 (중복 방지)
         localStorage.setItem('intoConsultations', JSON.stringify(records));
         updateStats();
         renderRecords();
-        showToast('✅ 최신 데이터 불러옴 (' + records.length + '건)');
       }
     } catch(e) {
       console.log('Sheets 로드 실패, 로컬 데이터 사용');
