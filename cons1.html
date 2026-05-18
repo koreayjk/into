@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>INTO유학CENTER — 1차 상담</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -328,7 +329,9 @@ textarea{resize:vertical;min-height:100px}
 
 <script>
 const PASSWORD = '1234';
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzla7nk3JEMasIHJYvzJNCR2D4Bl8ZEJNM1dIiaUC9sVW6mjRJZQvyKE0WFTbIQUSSy/exec';
+const SUPA_URL2 = 'https://illbgsjvhsciougzjgwn.supabase.co';
+const SUPA_KEY2 = 'sb_publishable_EmIn4ZpTksxxbq7vXWTk4w_Wc38j9yH';
+const sb2 = window.supabase.createClient(SUPA_URL2, SUPA_KEY2);
 
 // ── LOGIN ──
 function checkLogin(){if(sessionStorage.getItem('into_auth_cons1')==='ok')document.getElementById('loginOverlay').classList.add('hidden')}
@@ -447,11 +450,25 @@ async function saveRecord(){
 
   showToast('💾 저장 중...');
   try{
-    await fetch(SHEET_URL,{
-      method:'POST',mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(record)
+    const {error:saveErr} = await sb2.from('first_consultations').insert({
+      id: record.id,
+      writer: record.writer,
+      date: record.date,
+      name_ko: record.nameKo,
+      name_en: record.nameEn,
+      birth: record.birth,
+      phone: record.phone,
+      email: record.email,
+      channel: record.channel,
+      study_type: record.studyType,
+      study_date: record.studyDate,
+      english_level: record.englishLevel,
+      test_score: record.testScore,
+      purpose: record.purpose,
+      region: record.region,
+      notes: record.notes
     });
+    if (saveErr) throw saveErr;
     showToast('✅ 저장 완료!');
     // 성공 화면 표시
     document.querySelector('.page-wrap > .form-card, .page-wrap').style.display;
