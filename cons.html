@@ -1624,7 +1624,7 @@ textarea { resize: vertical; min-height: 160px; }
           <div class="record-body">
             <div class="record-name">
               ${r.name}
-              <span class="record-phone">${r.phone}</span>
+              <span class="record-phone">${String(r.phone||'').replace(/^(\d{9,10})$/, m => '0'+m)}</span>
             </div>
             <div class="record-tags">
               ${r.date ? `<span class="rtag rtag-date">📅 ${r.date}</span>` : ''}
@@ -1648,7 +1648,7 @@ textarea { resize: vertical; min-height: 160px; }
     document.getElementById('modalName').textContent = r.name + ' 님 상담 기록';
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row"><div class="detail-label">이름</div><div class="detail-value">${r.name}</div></div>
-      <div class="detail-row"><div class="detail-label">연락처</div><div class="detail-value">${r.phone}</div></div>
+      <div class="detail-row"><div class="detail-label">연락처</div><div class="detail-value">${String(r.phone||'-').replace(/^(\d{9,10})$/, m => '0'+m)}</div></div>
       <div class="detail-row"><div class="detail-label">학년/나이</div><div class="detail-value">${r.grade||'미기재'}</div></div>
       <div class="detail-row"><div class="detail-label">상담 일자</div><div class="detail-value">${r.date || '미기재'}</div></div>
       <div class="detail-row"><div class="detail-label">상담자</div><div class="detail-value">${r.consultant || '미기재'}</div></div>
@@ -2319,7 +2319,7 @@ textarea { resize: vertical; min-height: 160px; }
       return `<div class="record-item" onclick="openFirstModal(${i})">
         <div class="record-avatar ${av}" style="${fDone?'background:#16a34a':''}">${r.name.charAt(0)}</div>
         <div class="record-body">
-          <div class="record-name">${r.name}<span class="record-phone">${r.phone}</span></div>
+          <div class="record-name">${r.name}<span class="record-phone">${String(r.phone||'').replace(/^(\d{9,10})$/, m => '0'+m)}</span></div>
           <div class="record-tags">
             ${r.date ? `<span class="rtag rtag-date">📅 ${r.date}</span>` : ''}
             ${r.writer ? `<span class="rtag rtag-co">✍️ ${r.writer}</span>` : ''}
@@ -2353,7 +2353,7 @@ textarea { resize: vertical; min-height: 160px; }
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row"><div class="detail-label">작성자</div><div class="detail-value">${r.writer||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">이름</div><div class="detail-value">${r.name||'-'}</div></div>
-      <div class="detail-row"><div class="detail-label">전화번호</div><div class="detail-value">${r.phone||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">전화번호</div><div class="detail-value">${String(r.phone||'-').replace(/^(\d{9,10})$/, m => '0'+m)}</div></div>
       <div class="detail-row"><div class="detail-label">이메일</div><div class="detail-value">${r.email||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">생년월일</div><div class="detail-value">${r.birth||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">상담 일자</div><div class="detail-value">${r.date||'-'}</div></div>
@@ -2512,7 +2512,7 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="record-item" onclick="openInquiryModal(${i})" style="cursor:pointer;">
         <div class="record-avatar ${isDone ? 'av-4' : 'av-3'}">📩</div>
         <div class="record-body">
-          <div class="record-name">${r['이름']||'-'} <span class="record-phone">${r['연락처']||r['카카오톡ID']||''}</span></div>
+          <div class="record-name">${r['이름']||'-'} <span class="record-phone">${String(r['연락처']||r['카카오톡ID']||'').replace(/^(\d{9,10})$/, m => '0'+m)}</span></div>
           <div class="record-tags">
             ${r['관심국가'] ? `<span class="rtag rtag-ch">🌏 ${r['관심국가']}</span>` : ''}
             ${r['학년'] ? `<span class="rtag rtag-date">🎓 ${r['학년']}</span>` : ''}
@@ -2538,7 +2538,7 @@ textarea { resize: vertical; min-height: 160px; }
     document.getElementById('modalName').textContent = (r['이름']||'-') + ' 님 상담 신청';
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row"><div class="detail-label">이름</div><div class="detail-value">${r['이름']||'-'}</div></div>
-      <div class="detail-row"><div class="detail-label">연락처</div><div class="detail-value">${r['연락처']||'-'}</div></div>
+      <div class="detail-row"><div class="detail-label">연락처</div><div class="detail-value">${String(r['연락처']||'-').replace(/^(\d{9,10})$/, m => '0'+m)}</div></div>
       <div class="detail-row"><div class="detail-label">카카오톡 ID</div><div class="detail-value">${r['카카오톡ID']||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">학년/나이</div><div class="detail-value">${r['학년']||'-'}</div></div>
       <div class="detail-row"><div class="detail-label">관심 국가</div><div class="detail-value">${r['관심국가']||'-'}</div></div>
