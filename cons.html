@@ -1067,10 +1067,6 @@ textarea { resize: vertical; min-height: 160px; }
       <div class="login-input-wrap" style="margin-bottom:12px">
         <input type="text" id="signupName" placeholder="홍길동">
       </div>
-      <label>사용자 ID (영문)</label>
-      <div class="login-input-wrap" style="margin-bottom:12px">
-        <input type="text" id="signupUsername" placeholder="moses" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')">
-      </div>
       <label>이메일</label>
       <div class="login-input-wrap" style="margin-bottom:12px">
         <input type="email" id="signupEmail" placeholder="name@example.com">
@@ -1428,16 +1424,15 @@ textarea { resize: vertical; min-height: 160px; }
 
   window.doSignup = async function() {
     const name = document.getElementById('signupName').value.trim();
-    const username = document.getElementById('signupUsername').value.trim();
     const email = document.getElementById('signupEmail').value.trim();
     const pw = document.getElementById('signupPw').value;
     const err = document.getElementById('signupError');
     const ok = document.getElementById('signupOk');
     err.textContent = ''; ok.textContent = '';
-    if (!name||!username||!email||!pw) { err.textContent='모든 항목을 입력하세요'; return; }
+    if (!name||!email||!pw) { err.textContent='모든 항목을 입력하세요'; return; }
     if (pw.length < 6) { err.textContent='비밀번호는 6자 이상이어야 합니다'; return; }
-    const {data:existing} = await sb.from('consultant_profiles').select('id').eq('username', username).maybeSingle();
-    if (existing) { err.textContent='이미 사용 중인 ID입니다'; return; }
+    // username은 이메일 @ 앞부분으로 자동 생성
+    const username = email.split('@')[0].toLowerCase().replace(/[^a-z0-9-]/g,'-');
     const {data, error} = await sb.auth.signUp({email, password: pw});
     if (error) { err.textContent = error.message; return; }
     await sb.from('consultant_profiles').insert({
