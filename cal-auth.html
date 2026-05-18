@@ -66,30 +66,30 @@ input:focus{border-color:var(--sky);background:white;box-shadow:0 0 0 3px rgba(5
 <script>
 const SUPA_URL = 'https://epzzpabzhahguulnsttp.supabase.co';
 const SUPA_KEY = 'sb_publishable_CSaQ40mQCxn56DNKA_1_og_-yyB0HqN';
-const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 // 이미 로그인 됐으면 대시보드로
 supabase.auth.getSession().then(({data:{session}}) => {
   if (session) location.href = 'cal-dashboard.html';
 });
 
-function switchTab(t) {
+window.switchTab = function(t) {
   document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='login')||(i===1&&t==='signup')));
   document.getElementById('loginForm').style.display = t==='login'?'block':'none';
   document.getElementById('signupForm').style.display = t==='signup'?'block':'none';
 }
 
-async function doLogin() {
+async window.doLogin = async function() {
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPw').value;
   document.getElementById('loginErr').textContent = '';
   if (!email||!pw) { document.getElementById('loginErr').textContent='이메일과 비밀번호를 입력하세요'; return; }
-  const {error} = await supabase.auth.signInWithPassword({email, password:pw});
+  const {error} = await sb.auth.signInWithPassword({email, password:pw});
   if (error) { document.getElementById('loginErr').textContent='이메일 또는 비밀번호가 틀렸습니다.'; return; }
   location.href = 'cal-dashboard.html';
 }
 
-async function doSignup() {
+window.doSignup = async function() {
   const name = document.getElementById('signupName').value.trim();
   const username = document.getElementById('signupUsername').value.trim();
   const email = document.getElementById('signupEmail').value.trim();
@@ -102,14 +102,14 @@ async function doSignup() {
   if (pw.length < 6) { err.textContent='비밀번호는 6자 이상이어야 합니다'; return; }
 
   // username 중복 확인
-  const {data:existing} = await supabase.from('consultant_profiles').select('id').eq('username', username).single();
+  const {data:existing} = await sb.from('consultant_profiles').select('id').eq('username', username).single();
   if (existing) { err.textContent='이미 사용 중인 ID입니다'; return; }
 
-  const {data, error} = await supabase.auth.signUp({email, password:pw});
+  const {data, error} = await sb.auth.signUp({email, password:pw});
   if (error) { err.textContent=error.message; return; }
 
   // 프로필 생성
-  await supabase.from('consultant_profiles').insert({
+  await sb.from('consultant_profiles').insert({
     id: data.user.id, name, email, username,
     avatar_color: ['#0f2a47','#0369a1','#0c4a6e','#164e63','#1a3f6f'][name.charCodeAt(0)%5]
   });
