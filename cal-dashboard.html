@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTO 상담 예약 — 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f2a47;--sky:#38bdf8;--sky-light:#e0f2fe;--bg:#f0f4f8;--white:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--green:#16a34a;--green-bg:#dcfce7;--red:#dc2626;--red-bg:#fee2e2}
+body{font-family:"Noto Sans KR",sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
+.topbar{background:var(--navy);height:56px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100}
+.topbar img{height:30px;mix-blend-mode:lighten}
+.topbar .title{color:white;font-size:14px;font-weight:700;flex:1}
+.topbar .user-info{color:rgba(255,255,255,.6);font-size:12px}
+.btn-logout{background:rgba(255,255,255,.1);color:white;border:none;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:"Noto Sans KR",sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.section-title{font-size:18px;font-weight:900;color:var(--navy)}
+.btn-new{background:var(--navy);color:white;border:none;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:"Noto Sans KR",sans-serif;display:flex;align-items:center;gap:6px}
+.meeting-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:32px}
+.meeting-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(15,42,71,.08);transition:transform .2s,box-shadow .2s}
+.meeting-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(15,42,71,.12)}
+.mc-top{padding:20px;position:relative}
+.mc-color{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.mc-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.mc-desc{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+.mc-meta{display:flex;gap:8px;flex-wrap:wrap}
+.mc-tag{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--sky-light);color:#0369a1;font-weight:600}
+.mc-bottom{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;align-items:center}
+.mc-link{flex:1;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-copy{background:var(--sky-light);color:#0369a1;border:none;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:"Noto Sans KR",sans-serif}
+.btn-edit{background:var(--bg);color:var(--muted);border:none;padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:"Noto Sans KR",sans-serif}
+.btn-del{color:var(--red);background:none;border:none;padding:6px;cursor:pointer;font-size:14px}
+.toggle{position:relative;width:36px;height:20px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#cbd5e1;border-radius:20px;transition:.2s}
+.toggle input:checked+.toggle-slider{background:var(--green)}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:2px;top:2px;background:white;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider::before{transform:translateX(16px)}
+
+/* 예약 목록 */
+.bookings-section{margin-top:8px}
+.booking-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:12px;font-weight:600;cursor:pointer;font-family:"Noto Sans KR",sans-serif;color:var(--muted);transition:all .15s}
+.filter-btn.active{background:var(--navy);border-color:var(--navy);color:white}
+.booking-item{background:white;border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(15,42,71,.06)}
+.bi-date{text-align:center;min-width:52px;background:var(--sky-light);border-radius:10px;padding:8px 4px}
+.bi-date .day{font-size:22px;font-weight:900;color:var(--navy);line-height:1}
+.bi-date .month{font-size:10px;color:#0369a1;font-weight:600}
+.bi-info{flex:1}
+.bi-name{font-size:14px;font-weight:700}
+.bi-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.bi-time{font-size:13px;font-weight:700;color:var(--navy);white-space:nowrap}
+.status-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:600}
+.status-confirmed{background:var(--green-bg);color:var(--green)}
+.status-cancelled{background:var(--red-bg);color:var(--red)}
+.empty-state{text-align:center;padding:40px;color:var(--muted)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+
+/* 모달 */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:16px;width:100%;max-width:520px;overflow:hidden;max-height:90vh;overflow-y:auto}
+.modal-header{background:var(--navy);padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{color:white;font-size:15px;font-weight:700}
+.modal-close{background:none;border:none;color:white;font-size:20px;cursor:pointer}
+.modal-body{padding:20px}
+.fg{margin-bottom:14px}
+label.lbl{display:block;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+input[type=text],input[type=number],textarea,select{font-family:"Noto Sans KR",sans-serif;font-size:13px;width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none;transition:all .15s;color:var(--text);background:#f8fafc}
+input:focus,textarea:focus,select:focus{border-color:var(--sky);background:white}
+textarea{resize:vertical;min-height:70px}
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:6px}
+.day-btn{border:1.5px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;background:white;font-family:"Noto Sans KR",sans-serif;color:var(--muted)}
+.day-btn.active{border-color:var(--navy);background:var(--navy);color:white}
+.time-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-top:8px}
+.time-sep{color:var(--muted);text-align:center;font-size:13px}
+.color-grid{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.color-btn{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all .15s}
+.color-btn.selected{border-color:var(--text);transform:scale(1.2)}
+.modal-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.btn-save{background:var(--navy);color:white;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:"Noto Sans KR",sans-serif}
+.btn-cancel{background:var(--bg);color:var(--muted);border:1.5px solid var(--border);padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:"Noto Sans KR",sans-serif}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:white;padding:12px 18px;border-radius:9px;font-size:13px;font-weight:500;border-left:4px solid var(--sky);transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:300}
+.toast.show{transform:translateY(0);opacity:1}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <img src="https://koreayjk.github.io/into/intologo2.png">
+  <div class="title">상담 예약 관리</div>
+  <div class="user-info" id="userInfo"></div>
+  <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+</div>
+
+<div class="wrap">
+  <!-- 미팅 섹션 -->
+  <div class="section-header">
+    <div class="section-title">📅 내 미팅 섹션</div>
+    <button class="btn-new" onclick="openNewMeeting()">+ 새 미팅 만들기</button>
+  </div>
+  <div class="meeting-grid" id="meetingGrid">
+    <div class="empty-state"><div class="empty-icon">📅</div><p>로딩 중...</p></div>
+  </div>
+
+  <!-- 예약 목록 -->
+  <div class="bookings-section">
+    <div class="section-header">
+      <div class="section-title">📋 예약 현황</div>
+    </div>
+    <div class="booking-filters">
+      <button class="filter-btn active" onclick="filterBookings('all', this)">전체</button>
+      <button class="filter-btn" onclick="filterBookings('upcoming', this)">예정</button>
+      <button class="filter-btn" onclick="filterBookings('past', this)">지난</button>
+    </div>
+    <div id="bookingsList"><div class="empty-state"><div class="empty-icon">📋</div><p>예약을 불러오는 중...</p></div></div>
+  </div>
+</div>
+
+<!-- 미팅 만들기 모달 -->
+<div class="modal-overlay" id="meetingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">새 미팅 섹션</h3>
+      <button class="modal-close" onclick="closeMeetingModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label class="lbl">미팅 제목</label><input type="text" id="mtTitle" placeholder="예: 30분 유학 상담"></div>
+      <div class="fg"><label class="lbl">설명 (선택)</label><textarea id="mtDesc" placeholder="상담 내용에 대한 간단한 설명"></textarea></div>
+      <div class="fg"><label class="lbl">상담 시간 (분)</label>
+        <select id="mtDuration">
+          <option value="30">30분</option>
+          <option value="60" selected>60분</option>
+          <option value="90">90분</option>
+          <option value="120">2시간</option>
+        </select>
+      </div>
+      <div class="fg"><label class="lbl">색상</label>
+        <div class="color-grid" id="colorGrid"></div>
+      </div>
+      <div class="fg"><label class="lbl">가능한 요일</label>
+        <div class="day-grid" id="dayGrid"></div>
+      </div>
+      <div class="fg"><label class="lbl">가능한 시간대</label>
+        <div class="time-row">
+          <input type="time" id="mtStartTime" value="09:00">
+          <div class="time-sep">~</div>
+          <input type="time" id="mtEndTime" value="18:00">
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">※ 설정한 시간 내에서 상담 시간 단위로 슬롯이 자동 생성됩니다</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeMeetingModal()">취소</button>
+      <button class="btn-save" onclick="saveMeeting()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://epzzpabzhahguulnsttp.supabase.co';
+const SUPA_KEY = 'sb_publishable_CSaQ40mQCxn56DNKA_1_og_-yyB0HqN';
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const COLORS = ['#0f2a47','#0369a1','#0c4a6e','#16a34a','#b45309','#7c3aed','#be185d','#dc2626'];
+const DAYS = ['일','월','화','수','목','금','토'];
+let currentUser = null;
+let currentProfile = null;
+let allBookings = [];
+let editingMeetingId = null;
+let selectedDays = [1,2,3,4,5]; // 기본 월~금
+let selectedColor = COLORS[0];
+
+async function init() {
+  const {data:{session}} = await sb.auth.getSession();
+  if (!session) { location.href='cal-auth.html'; return; }
+  currentUser = session.user;
+
+  const {data:profile} = await sb.from('consultant_profiles').select('*').eq('id', currentUser.id).single();
+  currentProfile = profile;
+  document.getElementById('userInfo').textContent = profile?.name || currentUser.email;
+
+  renderColorGrid();
+  renderDayGrid();
+  await loadMeetings();
+  await loadBookings();
+}
+
+function renderColorGrid() {
+  document.getElementById('colorGrid').innerHTML = COLORS.map(c =>
+    `<div class="color-btn ${c===selectedColor?'selected':''}" style="background:${c}" onclick="selectColor('${c}', this)"></div>`
+  ).join('');
+}
+
+function renderDayGrid() {
+  document.getElementById('dayGrid').innerHTML = DAYS.map((d,i) =>
+    `<button class="day-btn ${selectedDays.includes(i)?'active':''}" onclick="toggleDay(${i}, this)">${d}</button>`
+  ).join('');
+}
+
+function selectColor(c, el) {
+  selectedColor = c;
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleDay(i, el) {
+  if (selectedDays.includes(i)) selectedDays = selectedDays.filter(d=>d!==i);
+  else selectedDays.push(i);
+  el.classList.toggle('active');
+}
+
+async function loadMeetings() {
+  const {data} = await sb.from('meeting_types').select('*').eq('user_id', currentUser.id).order('created_at');
+  const grid = document.getElementById('meetingGrid');
+  if (!data?.length) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📅</div><p>아직 미팅 섹션이 없어요.<br>+ 새 미팅 만들기를 눌러 시작하세요!</p></div>';
+    return;
+  }
+  const baseUrl = `${location.origin}${location.pathname.replace('cal-dashboard.html','cal-book.html')}`;
+  grid.innerHTML = data.map(m => {
+    const link = `${baseUrl}?u=${currentProfile?.username}&m=${m.slug}`;
+    return `<div class="meeting-card">
+      <div class="mc-top">
+        <div class="mc-color" style="background:${m.color}20;color:${m.color}">📅</div>
+        <div class="mc-title">${m.title}</div>
+        <div class="mc-desc">${m.description||'설명 없음'}</div>
+        <div class="mc-meta">
+          <span class="mc-tag">⏱ ${m.duration_minutes}분</span>
+          <span class="mc-tag" style="${m.is_active?'background:#dcfce7;color:#16a34a':'background:#fee2e2;color:#dc2626'}">${m.is_active?'활성':'비활성'}</span>
+        </div>
+      </div>
+      <div class="mc-bottom">
+        <div class="mc-link">${link}</div>
+        <button class="btn-copy" onclick="copyLink('${link}')">링크 복사</button>
+        <button class="btn-edit" onclick="editMeeting('${m.id}')">✏️</button>
+        <button class="btn-del" onclick="deleteMeeting('${m.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadBookings() {
+  const {data} = await sb.from('bookings').select('*, meeting_types(title)').eq('host_id', currentUser.id).order('date', {ascending:false}).order('start_time');
+  allBookings = data || [];
+  renderBookings('all');
+}
+
+function renderBookings(filter) {
+  const today = new Date().toISOString().split('T')[0];
+  let list = allBookings;
+  if (filter==='upcoming') list = list.filter(b=>b.date>=today);
+  if (filter==='past') list = list.filter(b=>b.date<today);
+
+  const el = document.getElementById('bookingsList');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>예약이 없습니다</p></div>';
+    return;
+  }
+  const months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  el.innerHTML = list.map(b => {
+    const d = new Date(b.date);
+    return `<div class="booking-item">
+      <div class="bi-date">
+        <div class="day">${d.getDate()}</div>
+        <div class="month">${months[d.getMonth()]}</div>
+      </div>
+      <div class="bi-info">
+        <div class="bi-name">${b.guest_name} <span style="font-size:11px;color:var(--muted);font-weight:400">${b.guest_phone}</span></div>
+        <div class="bi-meta">${b.meeting_types?.title||''} · ${b.note||'메모 없음'}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="bi-time">${b.start_time} ~ ${b.end_time}</div>
+        <div class="status-badge status-${b.status}" style="margin-top:4px">${b.status==='confirmed'?'확정':'취소'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterBookings(f, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBookings(f);
+}
+
+function openNewMeeting() {
+  editingMeetingId = null;
+  document.getElementById('modalTitle').textContent = '새 미팅 섹션';
+  document.getElementById('mtTitle').value = '';
+  document.getElementById('mtDesc').value = '';
+  document.getElementById('mtDuration').value = '60';
+  document.getElementById('mtStartTime').value = '09:00';
+  document.getElementById('mtEndTime').value = '18:00';
+  selectedDays = [1,2,3,4,5];
+  selectedColor = COLORS[0];
+  renderColorGrid(); renderDayGrid();
+  document.getElementById('meetingModal').classList.add('open');
+}
+
+async function editMeeting(id) {
+  const {data:m} = await sb.from('meeting_types').select('*').eq('id',id).single();
+  const {data:avail} = await sb.from('availabilities').select('*').eq('meeting_type_id',id);
+  editingMeetingId = id;
+  document.getElementById('modalTitle').textContent = '미팅 수정';
+  document.getElementById('mtTitle').value = m.title;
+  document.getElementById('mtDesc').value = m.description||'';
+  document.getElementById('mtDuration').value = m.duration_minutes;
+  selectedColor = m.color;
+  selectedDays = [...new Set((avail||[]).map(a=>a.day_of_week))];
+  if (avail?.length) {
+    document.getElementById('mtStartTime').value = avail[0].start_time;
+    document.getElementById('mtEndTime').value = avail[0].end_time;
+  }
+  renderColorGrid(); renderDayGrid();
+  document.getElementById('meetingModal').classList.add('open');
+}
+
+async function saveMeeting() {
+  const title = document.getElementById('mtTitle').value.trim();
+  const desc = document.getElementById('mtDesc').value.trim();
+  const duration = parseInt(document.getElementById('mtDuration').value);
+  const startTime = document.getElementById('mtStartTime').value;
+  const endTime = document.getElementById('mtEndTime').value;
+  if (!title) { showToast('⚠️ 제목을 입력하세요'); return; }
+  if (!selectedDays.length) { showToast('⚠️ 가능한 요일을 선택하세요'); return; }
+
+  const slug = editingMeetingId
+    ? (await sb.from('meeting_types').select('slug').eq('id',editingMeetingId).single()).data?.slug
+    : title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-가-힣]/g,'') + '-' + Date.now().toString(36);
+
+  if (editingMeetingId) {
+    await sb.from('meeting_types').update({title, description:desc, duration_minutes:duration, color:selectedColor}).eq('id',editingMeetingId);
+    await sb.from('availabilities').delete().eq('meeting_type_id',editingMeetingId);
+    await sb.from('availabilities').insert(selectedDays.map(d=>({meeting_type_id:editingMeetingId, day_of_week:d, start_time:startTime, end_time:endTime})));
+  } else {
+    const {data:mt} = await sb.from('meeting_types').insert({user_id:currentUser.id, title, description:desc, duration_minutes:duration, color:selectedColor, slug}).select().single();
+    await sb.from('availabilities').insert(selectedDays.map(d=>({meeting_type_id:mt.id, day_of_week:d, start_time:startTime, end_time:endTime})));
+  }
+  closeMeetingModal();
+  showToast('✅ 저장 완료!');
+  loadMeetings();
+}
+
+async function deleteMeeting(id) {
+  if (!confirm('이 미팅 섹션을 삭제하시겠습니까?')) return;
+  await sb.from('meeting_types').delete().eq('id',id);
+  showToast('🗑 삭제 완료');
+  loadMeetings();
+}
+
+function closeMeetingModal() { document.getElementById('meetingModal').classList.remove('open'); }
+
+function copyLink(link) {
+  navigator.clipboard.writeText(link);
+  showToast('📋 링크가 복사되었습니다!');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  location.href = 'cal-auth.html';
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>상담 예약</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f2a47;--sky:#38bdf8;--sky-light:#e0f2fe;--bg:#f0f4f8;--white:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--green:#16a34a;--green-bg:#dcfce7}
+body{font-family:"Noto Sans KR",sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
+.hero{padding:32px 20px 28px;text-align:center}
+.hero-inner{max-width:480px;margin:0 auto}
+.host-avatar{width:72px;height:72px;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;color:white}
+.host-name{font-size:20px;font-weight:900;color:var(--navy);margin-bottom:4px}
+.meeting-title{font-size:14px;color:var(--muted);margin-bottom:8px}
+.meeting-badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:12px;padding:4px 12px;border-radius:20px;background:var(--sky-light);color:#0369a1;font-weight:600}
+.step-indicator{display:flex;justify-content:center;gap:8px;margin:20px 0;padding:0 20px}
+.si{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.si.active{color:var(--navy)}
+.si.done{color:var(--green)}
+.si-dot{width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.si.active .si-dot{background:var(--navy);color:white}
+.si.done .si-dot{background:var(--green);color:white}
+.si-line{width:24px;height:2px;background:var(--border)}
+.si.done + .si-line{background:var(--green)}
+.wrap{max-width:600px;margin:0 auto;padding:0 16px 60px}
+.card{background:white;border-radius:14px;box-shadow:0 4px 20px rgba(15,42,71,.08);margin-bottom:16px;overflow:hidden}
+.card-header{background:var(--navy);padding:14px 20px}
+.card-header h2{color:white;font-size:14px;font-weight:700}
+
+/* CALENDAR */
+.cal-wrap{padding:20px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-nav button{background:none;border:1.5px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:16px}
+.cal-nav button:hover{border-color:var(--navy)}
+.cal-title{font-size:16px;font-weight:700;color:var(--navy)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-lbl{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:6px 0}
+.cal-day{text-align:center;padding:9px 4px;border-radius:8px;font-size:13px;min-height:38px;display:flex;align-items:center;justify-content:center;position:relative}
+.cal-day.avail{cursor:pointer;font-weight:600}
+.cal-day.avail:hover{background:var(--sky-light);color:var(--navy)}
+.cal-day.selected{background:var(--navy)!important;color:white!important;font-weight:700}
+.cal-day.today{color:var(--sky);font-weight:700}
+.cal-day.unavail{color:#cbd5e1;cursor:default}
+.cal-day.avail::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--sky)}
+.cal-day.selected::after{background:rgba(255,255,255,.6)}
+
+/* TIME SLOTS */
+.time-wrap{padding:0 20px 20px}
+.slot-date{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+.slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{border:1.5px solid var(--border);border-radius:8px;padding:11px;text-align:center;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+.slot:hover{border-color:var(--sky);background:var(--sky-light)}
+.slot.selected{background:var(--navy);border-color:var(--navy);color:white}
+.slot.booked{background:#f8fafc;color:#cbd5e1;cursor:not-allowed}
+
+/* FORM */
+.form-wrap{padding:20px}
+.summary{background:var(--sky-light);border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:16px}
+.sum-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
+.sum-label{color:var(--muted);font-size:12px}
+.sum-value{font-weight:700;color:var(--navy)}
+.fg{margin-bottom:14px}
+label.lbl{display:block;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+input[type=text],input[type=tel],input[type=email],select,textarea{font-family:"Noto Sans KR",sans-serif;font-size:13px;width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none;transition:all .15s;color:var(--text);background:#f8fafc}
+input:focus,textarea:focus,select:focus{border-color:var(--sky);background:white}
+textarea{resize:vertical;min-height:80px}
+.btn-row{display:flex;gap:10px}
+.btn-primary{flex:1;font-family:"Noto Sans KR",sans-serif;font-size:14px;font-weight:700;padding:13px;border-radius:10px;background:var(--navy);color:white;border:none;cursor:pointer}
+.btn-primary:disabled{background:#cbd5e1;cursor:not-allowed}
+.btn-secondary{font-family:"Noto Sans KR",sans-serif;font-size:13px;padding:13px 20px;border-radius:10px;background:white;color:var(--muted);border:1.5px solid var(--border);cursor:pointer}
+
+/* SUCCESS */
+.success{text-align:center;padding:48px 20px}
+.s-icon{font-size:64px;margin-bottom:20px}
+.s-title{font-size:22px;font-weight:900;color:var(--navy);margin-bottom:12px}
+.s-sub{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:24px}
+.s-card{background:var(--sky-light);border:1px solid #bae6fd;border-radius:12px;padding:18px;margin-bottom:24px;text-align:left}
+.s-row{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid #bae6fd;font-size:13px}
+.s-row:last-child{border:none}
+.s-row .sl{color:var(--muted);min-width:80px;font-size:12px}
+.s-row .sv{font-weight:700;color:var(--navy)}
+
+.not-found{text-align:center;padding:60px 20px;color:var(--muted)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:white;padding:12px 18px;border-radius:9px;font-size:13px;border-left:4px solid var(--sky);transform:translateY(70px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:200}
+.toast.show{transform:translateY(0);opacity:1}
+@media(max-width:480px){.slot-grid{grid-template-columns:repeat(2,1fr)}.btn-row{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div style="text-align:center;padding:80px;color:#64748b">로딩 중...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPA_URL = 'https://epzzpabzhahguulnsttp.supabase.co';
+const SUPA_KEY = 'sb_publishable_CSaQ40mQCxn56DNKA_1_og_-yyB0HqN';
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+const params = new URLSearchParams(location.search);
+const username = params.get('u');
+const meetingSlug = params.get('m');
+
+let hostProfile = null, meetingType = null, availabilities = [], bookedSlots = [];
+let selectedDate = null, selectedSlot = null;
+let currentYear, currentMonth;
+
+async function init() {
+  if (!username || !meetingSlug) { showNotFound(); return; }
+  const now = new Date();
+  currentYear = now.getFullYear();
+  currentMonth = now.getMonth();
+
+  const {data:profile} = await sb.from('consultant_profiles').select('*').eq('username', username).single();
+  if (!profile) { showNotFound(); return; }
+  hostProfile = profile;
+
+  const {data:mt} = await sb.from('meeting_types').select('*').eq('slug', meetingSlug).eq('user_id', profile.id).single();
+  if (!mt || !mt.is_active) { showNotFound(); return; }
+  meetingType = mt;
+
+  const {data:avail} = await sb.from('availabilities').select('*').eq('meeting_type_id', mt.id);
+  availabilities = avail || [];
+
+  const {data:bookings} = await sb.from('bookings').select('date,start_time').eq('meeting_type_id', mt.id).neq('status','cancelled');
+  bookedSlots = bookings || [];
+
+  renderHero();
+  renderStep(1);
+}
+
+function showNotFound() {
+  document.getElementById('app').innerHTML = `<div class="not-found"><div style="font-size:48px;margin-bottom:16px">😕</div><p>예약 페이지를 찾을 수 없습니다.</p></div>`;
+}
+
+function renderHero() {
+  const color = meetingType.color || '#0f2a47';
+  document.title = `${hostProfile.name} — ${meetingType.title}`;
+  document.getElementById('app').innerHTML = `
+  <div class="hero" style="background:linear-gradient(135deg,${color}15,${color}05)">
+    <div class="hero-inner">
+      <div class="host-avatar" style="background:${color}">${hostProfile.name.charAt(0)}</div>
+      <div class="host-name">${hostProfile.name}</div>
+      <div class="meeting-title">${meetingType.title}</div>
+      <div class="meeting-badges">
+        <span class="badge">⏱ ${meetingType.duration_minutes}분</span>
+        ${meetingType.description ? `<span class="badge">💬 ${meetingType.description}</span>` : ''}
+      </div>
+    </div>
+  </div>
+  <div id="stepIndicator" style="display:flex;justify-content:center;align-items:center;gap:4px;padding:16px 20px;flex-wrap:wrap">
+    <div class="si active" id="si1"><div class="si-dot">1</div> <span>날짜선택</span></div>
+    <div class="si-line"></div>
+    <div class="si" id="si2"><div class="si-dot">2</div> <span>시간선택</span></div>
+    <div class="si-line"></div>
+    <div class="si" id="si3"><div class="si-dot">3</div> <span>정보입력</span></div>
+  </div>
+  <div class="wrap" id="stepContent"></div>`;
+  renderStep(1);
+}
+
+function renderStep(n) {
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('si'+i);
+    if (!el) return;
+    el.className = 'si' + (i<n?' done':i===n?' active':'');
+  });
+  const c = document.getElementById('stepContent');
+  if (n===1) renderCalendar(c);
+  else if (n===2) renderTimeSlots(c);
+  else if (n===3) renderForm(c);
+  else renderSuccess(c);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function renderCalendar(c) {
+  const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const today = new Date();
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+  const availDays = new Set(availabilities.map(a=>a.day_of_week));
+
+  let days = '';
+  for (let i=0;i<firstDay;i++) days += '<div class="cal-day"></div>';
+  for (let d=1;d<=daysInMonth;d++) {
+    const date = new Date(currentYear, currentMonth, d);
+    const ds = fmtDate(date);
+    const isPast = date < new Date(today.getFullYear(),today.getMonth(),today.getDate());
+    const avail = availDays.has(date.getDay()) && !isPast;
+    const sel = ds===selectedDate;
+    const isToday = date.toDateString()===today.toDateString();
+    let cls='cal-day'+(avail?' avail':'  unavail')+(sel?' selected':'')+(isToday?' today':'');
+    days += `<div class="${cls}" ${avail?`onclick="selectDate('${ds}')"`:''}>${d}</div>`;
+  }
+
+  c.innerHTML = `
+  <div class="card">
+    <div class="card-header"><h2>📅 날짜를 선택하세요</h2></div>
+    <div class="cal-wrap">
+      <div class="cal-nav">
+        <button onclick="prevMonth()">‹</button>
+        <div class="cal-title">${currentYear}년 ${months[currentMonth]}</div>
+        <button onclick="nextMonth()">›</button>
+      </div>
+      <div class="cal-grid">
+        ${['일','월','화','수','목','금','토'].map(d=>`<div class="cal-lbl">${d}</div>`).join('')}
+        ${days}
+      </div>
+    </div>
+  </div>`;
+}
+
+function selectDate(ds) {
+  selectedDate = ds; selectedSlot = null;
+  renderStep(2);
+}
+function prevMonth(){currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--;}renderStep(1);}
+function nextMonth(){currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++;}renderStep(1);}
+
+function renderTimeSlots(c) {
+  const date = new Date(selectedDate);
+  const dow = date.getDay();
+  const avail = availabilities.find(a=>a.day_of_week===dow);
+  const slots = generateSlots(avail?.start_time||'09:00', avail?.end_time||'18:00', meetingType.duration_minutes);
+  const booked = new Set(bookedSlots.filter(b=>b.date===selectedDate).map(b=>b.start_time));
+  const days=['일','월','화','수','목','금','토'];
+
+  c.innerHTML = `
+  <div class="card">
+    <div class="card-header"><h2>⏰ 시간을 선택하세요</h2></div>
+    <div class="time-wrap">
+      <div class="slot-date">${selectedDate} (${days[dow]}) — ${slots.length}개 슬롯</div>
+      <div class="slot-grid">
+        ${slots.map(s => {
+          const isBooked = booked.has(s.start);
+          const isSel = selectedSlot?.start===s.start;
+          return `<div class="slot${isBooked?' booked':isSel?' selected':''}" ${!isBooked?`onclick="selectSlot('${s.start}','${s.end}',this)"`:''}>
+            ${s.start}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="btn-row" style="padding:0 0 16px">
+    <button class="btn-secondary" onclick="renderStep(1)">← 이전</button>
+    <button class="btn-primary" id="step2Next" onclick="renderStep(3)" ${selectedSlot?'':'disabled'}>다음 →</button>
+  </div>`;
+}
+
+function selectSlot(start, end, el) {
+  selectedSlot = {start, end};
+  document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('step2Next').disabled = false;
+}
+
+function generateSlots(startTime, endTime, duration) {
+  const slots = [];
+  let [sh,sm] = startTime.split(':').map(Number);
+  let [eh,em] = endTime.split(':').map(Number);
+  let cur = sh*60+sm, end2 = eh*60+em;
+  while (cur + duration <= end2) {
+    const s = `${String(Math.floor(cur/60)).padStart(2,'0')}:${String(cur%60).padStart(2,'0')}`;
+    const e = `${String(Math.floor((cur+duration)/60)).padStart(2,'0')}:${String((cur+duration)%60).padStart(2,'0')}`;
+    slots.push({start:s, end:e});
+    cur += duration;
+  }
+  return slots;
+}
+
+function renderForm(c) {
+  const days=['일','월','화','수','목','금','토'];
+  const d = new Date(selectedDate);
+  c.innerHTML = `
+  <div class="card">
+    <div class="card-header"><h2>✍️ 예약자 정보 입력</h2></div>
+    <div class="form-wrap">
+      <div class="summary">
+        <div class="sum-row"><span class="sum-label">상담자</span><span class="sum-value">${hostProfile.name}</span></div>
+        <div class="sum-row"><span class="sum-label">날짜</span><span class="sum-value">${selectedDate} (${days[d.getDay()]})</span></div>
+        <div class="sum-row"><span class="sum-label">시간</span><span class="sum-value">${selectedSlot.start} ~ ${selectedSlot.end}</span></div>
+        <div class="sum-row"><span class="sum-label">미팅</span><span class="sum-value">${meetingType.title}</span></div>
+      </div>
+      <div class="fg"><label class="lbl">이름</label><input type="text" id="gName" placeholder="홍길동"></div>
+      <div class="fg"><label class="lbl">전화번호</label><input type="tel" id="gPhone" placeholder="010-0000-0000"></div>
+      <div class="fg"><label class="lbl">이메일 (선택)</label><input type="email" id="gEmail" placeholder="example@email.com"></div>
+      <div class="fg"><label class="lbl">문의 내용 (선택)</label><textarea id="gNote" placeholder="궁금한 점을 미리 적어주세요"></textarea></div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6;padding:10px;background:#f8fafc;border-radius:8px">
+        ✅ 입력하신 정보는 상담 예약 목적으로만 사용됩니다
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-secondary" onclick="renderStep(2)">← 이전</button>
+    <button class="btn-primary" onclick="submitBooking()">예약 확정 →</button>
+  </div>`;
+}
+
+async function submitBooking() {
+  const name = document.getElementById('gName').value.trim();
+  const phone = document.getElementById('gPhone').value.trim();
+  const email = document.getElementById('gEmail').value.trim();
+  const note = document.getElementById('gNote').value.trim();
+  if (!name) { showToast('⚠️ 이름을 입력하세요'); return; }
+  if (!phone) { showToast('⚠️ 전화번호를 입력하세요'); return; }
+
+  showToast('💾 예약 중...');
+  const {error} = await sb.from('bookings').insert({
+    meeting_type_id: meetingType.id,
+    host_id: hostProfile.id,
+    date: selectedDate,
+    start_time: selectedSlot.start,
+    end_time: selectedSlot.end,
+    guest_name: name,
+    guest_phone: phone,
+    guest_email: email,
+    note, status:'confirmed'
+  });
+
+  if (error) { showToast('⚠️ 예약 실패. 다시 시도해주세요.'); return; }
+  bookedSlots.push({date:selectedDate, start_time:selectedSlot.start});
+
+  // 성공 화면
+  const days=['일','월','화','수','목','금','토'];
+  const d=new Date(selectedDate);
+  const c=document.getElementById('stepContent');
+  [1,2,3].forEach(i=>{const el=document.getElementById('si'+i);if(el)el.className='si done';});
+  c.innerHTML=`<div class="success">
+    <div class="s-icon">🎉</div>
+    <div class="s-title">예약이 완료되었습니다!</div>
+    <div class="s-sub">${hostProfile.name} 컨설턴트가<br>예약 확인 후 연락드리겠습니다.</div>
+    <div class="s-card">
+      <div class="s-row"><span class="sl">예약자</span><span class="sv">${name}</span></div>
+      <div class="s-row"><span class="sl">상담자</span><span class="sv">${hostProfile.name}</span></div>
+      <div class="s-row"><span class="sl">날짜</span><span class="sv">${selectedDate} (${days[d.getDay()]})</span></div>
+      <div class="s-row"><span class="sl">시간</span><span class="sv">${selectedSlot.start} ~ ${selectedSlot.end}</span></div>
+      <div class="s-row"><span class="sl">미팅</span><span class="sv">${meetingType.title}</span></div>
+    </div>
+  </div>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function fmtDate(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+init();
+</script>
+</body>
+</html>

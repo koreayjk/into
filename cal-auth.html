@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTO 상담 예약 — 로그인</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0f2a47;--sky:#38bdf8;--sky-light:#e0f2fe;--bg:#f0f4f8;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--green:#16a34a;--red:#dc2626}
+body{font-family:"Noto Sans KR",sans-serif;background:linear-gradient(135deg,#0f2a47 0%,#1a3f6f 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:white;border-radius:20px;width:100%;max-width:400px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.3)}
+.card-top{background:var(--navy);padding:32px 28px 28px;text-align:center}
+.card-top img{height:52px;width:auto;display:block;margin:0 auto 10px;mix-blend-mode:lighten}
+.card-top p{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:2px;text-transform:uppercase}
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:14px;text-align:center;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab.active{color:var(--navy);border-bottom-color:var(--sky)}
+.form-wrap{padding:24px}
+.fg{margin-bottom:14px}
+label{display:block;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+input{font-family:"Noto Sans KR",sans-serif;font-size:13px;width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none;transition:all .15s;color:var(--text);background:#f8fafc}
+input:focus{border-color:var(--sky);background:white;box-shadow:0 0 0 3px rgba(56,189,248,.12)}
+.btn{font-family:"Noto Sans KR",sans-serif;font-size:14px;font-weight:700;width:100%;padding:13px;border-radius:10px;background:var(--navy);color:white;border:none;cursor:pointer;margin-top:4px;transition:background .15s}
+.btn:hover{background:#1a3f6f}
+.btn:disabled{background:#cbd5e1;cursor:not-allowed}
+.err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:18px}
+.ok{color:var(--green);font-size:12px;text-align:center;margin-top:8px}
+.divider{text-align:center;color:var(--muted);font-size:11px;margin:12px 0;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--border)}
+.divider::before{left:0}.divider::after{right:0}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-top">
+    <img src="https://koreayjk.github.io/into/intologo2.png" alt="인투유학">
+    <p>상담 예약 시스템</p>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('login')">로그인</div>
+    <div class="tab" onclick="switchTab('signup')">회원가입</div>
+  </div>
+
+  <!-- 로그인 -->
+  <div class="form-wrap" id="loginForm">
+    <div class="fg"><label>이메일</label><input type="email" id="loginEmail" placeholder="name@example.com"></div>
+    <div class="fg"><label>비밀번호</label><input type="password" id="loginPw" placeholder="비밀번호"></div>
+    <button class="btn" onclick="doLogin()">로그인</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+
+  <!-- 회원가입 -->
+  <div class="form-wrap" id="signupForm" style="display:none">
+    <div class="fg"><label>이름</label><input type="text" id="signupName" placeholder="홍길동"></div>
+    <div class="fg"><label>사용자 ID (영문)</label><input type="text" id="signupUsername" placeholder="moses (링크에 사용됨)" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')"></div>
+    <div class="fg"><label>이메일</label><input type="email" id="signupEmail" placeholder="name@example.com"></div>
+    <div class="fg"><label>비밀번호</label><input type="password" id="signupPw" placeholder="6자 이상"></div>
+    <button class="btn" onclick="doSignup()">회원가입</button>
+    <div class="err" id="signupErr"></div>
+    <div class="ok" id="signupOk"></div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL = 'https://epzzpabzhahguulnsttp.supabase.co';
+const SUPA_KEY = 'sb_publishable_CSaQ40mQCxn56DNKA_1_og_-yyB0HqN';
+const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// 이미 로그인 됐으면 대시보드로
+supabase.auth.getSession().then(({data:{session}}) => {
+  if (session) location.href = 'cal-dashboard.html';
+});
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='login')||(i===1&&t==='signup')));
+  document.getElementById('loginForm').style.display = t==='login'?'block':'none';
+  document.getElementById('signupForm').style.display = t==='signup'?'block':'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  document.getElementById('loginErr').textContent = '';
+  if (!email||!pw) { document.getElementById('loginErr').textContent='이메일과 비밀번호를 입력하세요'; return; }
+  const {error} = await supabase.auth.signInWithPassword({email, password:pw});
+  if (error) { document.getElementById('loginErr').textContent='이메일 또는 비밀번호가 틀렸습니다.'; return; }
+  location.href = 'cal-dashboard.html';
+}
+
+async function doSignup() {
+  const name = document.getElementById('signupName').value.trim();
+  const username = document.getElementById('signupUsername').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pw = document.getElementById('signupPw').value;
+  const err = document.getElementById('signupErr');
+  const ok = document.getElementById('signupOk');
+  err.textContent=''; ok.textContent='';
+
+  if (!name||!username||!email||!pw) { err.textContent='모든 항목을 입력하세요'; return; }
+  if (pw.length < 6) { err.textContent='비밀번호는 6자 이상이어야 합니다'; return; }
+
+  // username 중복 확인
+  const {data:existing} = await supabase.from('consultant_profiles').select('id').eq('username', username).single();
+  if (existing) { err.textContent='이미 사용 중인 ID입니다'; return; }
+
+  const {data, error} = await supabase.auth.signUp({email, password:pw});
+  if (error) { err.textContent=error.message; return; }
+
+  // 프로필 생성
+  await supabase.from('consultant_profiles').insert({
+    id: data.user.id, name, email, username,
+    avatar_color: ['#0f2a47','#0369a1','#0c4a6e','#164e63','#1a3f6f'][name.charCodeAt(0)%5]
+  });
+
+  ok.textContent='✅ 가입 완료! 로그인해주세요.';
+  setTimeout(() => switchTab('login'), 1500);
+}
+</script>
+</body>
+</html>
