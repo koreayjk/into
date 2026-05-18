@@ -144,6 +144,7 @@ function renderHero() {
   document.getElementById('app').innerHTML = `
   <div class="hero" style="background:linear-gradient(135deg,${color}15,${color}05)">
     <div class="hero-inner">
+      <img src="https://koreayjk.github.io/into/intologo1.png" alt="인투유학" style="height:48px;width:auto;display:block;margin:0 auto 16px;mix-blend-mode:multiply;">
       <div class="host-avatar" style="background:${color}">${hostProfile.name.charAt(0)}</div>
       <div class="host-name">${hostProfile.name}</div>
       <div class="meeting-title">${meetingType.title}</div>
@@ -324,6 +325,28 @@ async function submitBooking() {
 
   if (error) { showToast('⚠️ 예약 실패. 다시 시도해주세요.'); return; }
   bookedSlots.push({date:selectedDate, start_time:selectedSlot.start});
+
+  // 상담자에게 이메일 알림 (Supabase Auth로 이메일 가져오기)
+  try {
+    const days=['일','월','화','수','목','금','토'];
+    const d = new Date(selectedDate);
+    const emailBody = `새 예약이 들어왔습니다!\n\n예약자: ${name}\n연락처: ${phone}\n날짜: ${selectedDate} (${days[d.getDay()]})\n시간: ${selectedSlot.start} ~ ${selectedSlot.end}\n미팅: ${meetingType.title}\n${note ? '문의: ' + note : ''}`;
+    
+    // Supabase Auth Admin API로 이메일 발송
+    await sb.functions.invoke('send-booking-email', {
+      body: {
+        to: hostProfile.email,
+        subject: `[INTO유학] 새 상담 예약 - ${name} (${selectedDate} ${selectedSlot.start})`,
+        text: emailBody,
+        guestName: name,
+        guestPhone: phone,
+        date: selectedDate,
+        time: `${selectedSlot.start} ~ ${selectedSlot.end}`,
+        meetingTitle: meetingType.title,
+        note: note || ''
+      }
+    });
+  } catch(e) { console.log('email notification failed', e); }
 
   // 성공 화면
   const days=['일','월','화','수','목','금','토'];
