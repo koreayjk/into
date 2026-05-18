@@ -248,11 +248,10 @@ function renderTimeSlots(c) {
       <div class="slot-grid">
         ${slots.map(s => {
           const isBooked = booked.has(s.start);
-          const isSel = selectedSlot?.start===s.start;
           // 최소 예약 시간 체크
           const slotDateTime = new Date(selectedDate + 'T' + s.start + ':00');
           const isTooSoon = minNoticeHours > 0 && slotDateTime < nowPlus;
-          // 버퍼 체크: 예약된 슬롯 전후 buffer분 내 슬롯 비활성화
+          // 버퍼 체크
           const isBuffered = bufferMins > 0 && [...booked].some(bt => {
             const bookedMins = parseInt(bt.split(':')[0])*60 + parseInt(bt.split(':')[1]);
             const slotMins = parseInt(s.start.split(':')[0])*60 + parseInt(s.start.split(':')[1]);
