@@ -1095,6 +1095,9 @@ textarea { resize: vertical; min-height: 160px; }
 
   <nav class="sidebar-nav">
     <div class="nav-label">메뉴</div>
+    <div class="nav-item" id="navSchedule" onclick="showView('schedule', this)">
+      <span class="icon">📅</span> 상담 일정
+    </div>
     <div class="nav-item active" onclick="showView('form', this)">
       <span class="icon">📋</span> 2차 상담 작성
     </div>
@@ -1113,6 +1116,9 @@ textarea { resize: vertical; min-height: 160px; }
     <a href="admin.html" class="nav-item">
       <span class="icon">⚙️</span> 관리자 설정
     </a>
+    <div class="nav-item" onclick="doLogout()" style="margin-top:4px;color:#ef4444;cursor:pointer;">
+      <span class="icon">🚪</span> 로그아웃
+    </div>
   </nav>
 
   <div class="sidebar-stats">
@@ -1404,6 +1410,12 @@ textarea { resize: vertical; min-height: 160px; }
     document.getElementById('loginOverlay').classList.add('hidden');
     document.getElementById('loginError').textContent = '';
     initApp();
+  }
+
+  async function doLogout() {
+    await sb.auth.signOut();
+    sessionStorage.clear();
+    document.getElementById('loginOverlay').classList.remove('hidden');
   }
 
   window.switchLoginTab = function(tab) {
