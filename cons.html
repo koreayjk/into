@@ -2159,6 +2159,34 @@ textarea { resize: vertical; min-height: 160px; }
               <span style="color:var(--muted);text-align:center">~</span>
               <input type="time" id="msEnd" value="18:00" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
             </div></div>
+          <div style="margin-bottom:12px"><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">예약 가능 기간</label>
+            <select id="msRange" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <option value="7">1주일</option>
+              <option value="14">2주일</option>
+              <option value="30" selected>1개월</option>
+              <option value="60">2개월</option>
+              <option value="90">3개월</option>
+              <option value="180">6개월</option>
+              <option value="365">1년</option>
+            </select></div>
+          <div style="margin-bottom:12px"><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">최소 예약 시간 (몇 시간 전까지)</label>
+            <select id="msMinNotice" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <option value="0">제한 없음</option>
+              <option value="1">1시간 전</option>
+              <option value="2">2시간 전</option>
+              <option value="4">4시간 전</option>
+              <option value="8" selected>8시간 전</option>
+              <option value="24">24시간 전</option>
+              <option value="48">48시간 전</option>
+            </select></div>
+          <div style="margin-bottom:12px"><label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">슬롯 간 버퍼 시간</label>
+            <select id="msBuffer" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <option value="0" selected>없음</option>
+              <option value="10">10분</option>
+              <option value="15">15분</option>
+              <option value="30">30분</option>
+              <option value="60">1시간</option>
+            </select></div>
         </div>
         <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
           <button onclick="document.getElementById('meetSetupOverlay').remove()" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px 16px;border-radius:8px;background:var(--bg);color:var(--muted);border:1.5px solid var(--border);cursor:pointer">취소</button>
@@ -2190,9 +2218,15 @@ textarea { resize: vertical; min-height: 160px; }
     const days = window._msDays || [1,2,3,4,5];
     if (!title) { showToast('⚠️ 제목을 입력하세요'); return; }
     const slug = title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-가-힣]/g,'') + '-' + Date.now().toString(36);
+    const bookingRange = parseInt(document.getElementById('msRange').value);
+    const minNotice = parseInt(document.getElementById('msMinNotice').value);
+    const buffer = parseInt(document.getElementById('msBuffer').value);
     const {data:mt} = await sb.from('meeting_types').insert({
       user_id: currentUser.id, title, duration_minutes: duration,
-      color: '#0f2a47', slug, is_active: true
+      color: '#0f2a47', slug, is_active: true,
+      booking_range_days: bookingRange,
+      min_notice_hours: minNotice,
+      buffer_minutes: buffer
     }).select().single();
     await sb.from('availabilities').insert(days.map(d => ({
       meeting_type_id: mt.id, day_of_week: d, start_time: startTime, end_time: endTime
