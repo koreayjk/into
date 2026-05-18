@@ -2103,6 +2103,7 @@ textarea { resize: vertical; min-height: 160px; }
           <div style="font-size:10px;color:var(--muted);word-break:break-all;margin-bottom:10px">${link}</div>
           <div style="display:flex;gap:6px">
             <button onclick="navigator.clipboard.writeText('${link}');showToast('📋 링크 복사!')" style="flex:1;font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:700;padding:7px;border-radius:6px;background:var(--sky-light);color:#0369a1;border:none;cursor:pointer">링크 복사</button>
+            <button onclick="editMeetingType('${m.id}')" style="font-family:'Noto Sans KR',sans-serif;font-size:11px;padding:7px 10px;border-radius:6px;background:var(--green-bg);color:var(--green);border:none;cursor:pointer">✏️</button>
             <button onclick="deleteMeetingType('${m.id}')" style="font-family:'Noto Sans KR',sans-serif;font-size:11px;padding:7px 10px;border-radius:6px;background:var(--red-bg);color:var(--red);border:none;cursor:pointer">🗑</button>
           </div>
         </div>
@@ -2136,6 +2137,201 @@ textarea { resize: vertical; min-height: 160px; }
     }).join('');
   }
 
+  async function editMeetingType(id) {
+    const {data:mt} = await sb.from('meeting_types').select('*').eq('id', id).single();
+    const {data:avails} = await sb.from('availabilities').select('*').eq('meeting_type_id', id);
+    if (!mt) { showToast('⚠️ 데이터를 불러올 수 없습니다'); return; }
+
+    const days = ['일','월','화','수','목','금','토'];
+    const dayTimes = {0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
+    (avails||[]).forEach(a => {
+      dayTimes[a.day_of_week].push([a.start_time, a.end_time]);
+    });
+    window._msDayTimes = dayTimes;
+    window._editMeetingId = id;
+
+    function renderEditDayRows() {
+      return days.map((d,i) => {
+        const slots = window._msDayTimes[i] || [];
+        const active = slots.length > 0;
+        return `<div id="edayrow${i}" style="margin-bottom:10px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};border-radius:12px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:${active?'var(--sky-light)':'#f8fafc'}">
+            <button onclick="toggleEditDayNew(${i})" style="min-width:36px;height:36px;border-radius:8px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};background:${active?'var(--navy)':'white'};color:${active?'white':'var(--muted)'};font-weight:700;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif">${d}</button>
+            <span style="font-size:12px;color:${active?'var(--navy)':'var(--muted)'}">${active ? slots.length+'개 시간대' : '비활성'}</span>
+            ${active ? `<button onclick="addEditSlot(${i})" style="margin-left:auto;font-size:11px;padding:4px 10px;border-radius:6px;background:var(--navy);color:white;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif">+ 추가</button>` : ''}
+          </div>
+          ${active ? `<div id="edayslots${i}" style="padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px">
+            ${slots.map((s,si) => `<div style="display:flex;align-items:center;gap:6px">
+              <input type="time" value="${s[0]}" onchange="updateEditSlot(${i},${si},0,this.value)" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <span style="color:var(--muted);font-size:12px">~</span>
+              <input type="time" value="${s[1]}" onchange="updateEditSlot(${i},${si},1,this.value)" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              ${slots.length > 1 ? `<button onclick="removeEditSlot(${i},${si})" style="width:28px;height:28px;border-radius:6px;background:var(--red-bg);color:var(--red);border:none;cursor:pointer;font-size:14px">×</button>` : '<div style="width:28px"></div>'}
+            </div>`).join('')}
+          </div>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    const modalHtml = `<div id="editMeetSetupOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto">
+      <div style="background:white;border-radius:16px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto">
+        <div style="background:var(--navy);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-radius:16px 16px 0 0;position:sticky;top:0;z-index:1">
+          <span style="color:white;font-size:14px;font-weight:700">미팅 수정</span>
+          <button onclick="document.getElementById('editMeetSetupOverlay').remove()" style="background:none;border:none;color:white;font-size:20px;cursor:pointer">×</button>
+        </div>
+        <div style="padding:20px">
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">미팅 제목</label>
+            <input type="text" id="emsTit" value="${mt.title}" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">상담 시간</label>
+            <select id="emsDur" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <option value="30" ${mt.duration_minutes==30?'selected':''}>30분</option>
+              <option value="60" ${mt.duration_minutes==60?'selected':''}>60분</option>
+              <option value="90" ${mt.duration_minutes==90?'selected':''}>90분</option>
+              <option value="120" ${mt.duration_minutes==120?'selected':''}>2시간</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">요일별 가능 시간대</label>
+            <div id="editDayTimeRows">${renderEditDayRows()}</div>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">예약 가능 기간</label>
+            <select id="emsRange" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <option value="7" ${mt.booking_range_days==7?'selected':''}>1주일</option>
+              <option value="14" ${mt.booking_range_days==14?'selected':''}>2주일</option>
+              <option value="30" ${mt.booking_range_days==30?'selected':''}>1개월</option>
+              <option value="60" ${mt.booking_range_days==60?'selected':''}>2개월</option>
+              <option value="90" ${mt.booking_range_days==90?'selected':''}>3개월</option>
+              <option value="180" ${mt.booking_range_days==180?'selected':''}>6개월</option>
+              <option value="365" ${mt.booking_range_days==365?'selected':''}>1년</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">최소 예약 시간</label>
+            <select id="emsNotice" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <option value="0" ${mt.min_notice_hours==0?'selected':''}>제한 없음</option>
+              <option value="1" ${mt.min_notice_hours==1?'selected':''}>1시간 전</option>
+              <option value="2" ${mt.min_notice_hours==2?'selected':''}>2시간 전</option>
+              <option value="4" ${mt.min_notice_hours==4?'selected':''}>4시간 전</option>
+              <option value="8" ${mt.min_notice_hours==8?'selected':''}>8시간 전</option>
+              <option value="24" ${mt.min_notice_hours==24?'selected':''}>24시간 전</option>
+              <option value="48" ${mt.min_notice_hours==48?'selected':''}>48시간 전</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">버퍼 시간</label>
+            <select id="emsBuf" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <option value="0" ${mt.buffer_minutes==0?'selected':''}>없음</option>
+              <option value="10" ${mt.buffer_minutes==10?'selected':''}>10분</option>
+              <option value="15" ${mt.buffer_minutes==15?'selected':''}>15분</option>
+              <option value="30" ${mt.buffer_minutes==30?'selected':''}>30분</option>
+              <option value="60" ${mt.buffer_minutes==60?'selected':''}>1시간</option>
+            </select>
+          </div>
+        </div>
+        <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:white;border-radius:0 0 16px 16px">
+          <button onclick="document.getElementById('editMeetSetupOverlay').remove()" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px 16px;border-radius:8px;background:var(--bg);color:var(--muted);border:1.5px solid var(--border);cursor:pointer">취소</button>
+          <button onclick="updateMeetingType()" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:700;padding:10px 20px;border-radius:8px;background:var(--navy);color:white;border:none;cursor:pointer">저장</button>
+        </div>
+      </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  }
+
+  window.toggleEditDayTime = function(i) {
+    if (window._msDayTimes[i] !== '') window._msDayTimes[i] = '';
+    else window._msDayTimes[i] = '09:00-18:00';
+    const days = ['일','월','화','수','목','금','토'];
+    const active = window._msDayTimes[i] !== '';
+    const times = (window._msDayTimes[i]||'09:00-18:00').split('-');
+    const row = document.getElementById('edayrow'+i);
+    if (row) {
+      row.style.border = `1.5px solid ${active?'var(--navy)':'var(--border)'}`;
+      row.style.background = active ? 'var(--sky-light)' : '#f8fafc';
+      row.innerHTML = `<button onclick="toggleEditDayTime(${i})" style="min-width:36px;height:36px;border-radius:8px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};background:${active?'var(--navy)':'white'};color:${active?'white':'var(--muted)'};font-weight:700;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif">${days[i]}</button>
+        ${active ? `<input type="time" id="emsS${i}" value="${times[0]}" onchange="updateEditDayTime(${i})" style="font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none;flex:1">
+        <span style="color:var(--muted)">~</span>
+        <input type="time" id="emsE${i}" value="${times[1]}" onchange="updateEditDayTime(${i})" style="font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none;flex:1">` : `<span style="font-size:12px;color:var(--muted)">비활성</span>`}`;
+    }
+  };
+
+  window.updateEditDayTime = function(i) {
+    const s = document.getElementById('emsS'+i)?.value;
+    const e = document.getElementById('emsE'+i)?.value;
+    if (s && e) window._msDayTimes[i] = s + '-' + e;
+  };
+
+  window.toggleEditDayNew = function(i) {
+    if ((window._msDayTimes[i]||[]).length > 0) window._msDayTimes[i] = [];
+    else window._msDayTimes[i] = [['09:00','18:00']];
+    refreshEditDayRow(i);
+  };
+  window.addEditSlot = function(i) {
+    if (!window._msDayTimes[i]) window._msDayTimes[i] = [];
+    window._msDayTimes[i].push(['09:00','18:00']);
+    refreshEditDayRow(i);
+  };
+  window.removeEditSlot = function(i, si) {
+    window._msDayTimes[i].splice(si, 1);
+    refreshEditDayRow(i);
+  };
+  window.updateEditSlot = function(i, si, idx, val) {
+    if (window._msDayTimes[i]?.[si]) window._msDayTimes[i][si][idx] = val;
+  };
+  function refreshEditDayRow(i) {
+    const days = ['일','월','화','수','목','금','토'];
+    const slots = window._msDayTimes[i] || [];
+    const active = slots.length > 0;
+    const row = document.getElementById('edayrow'+i);
+    if (!row) return;
+    row.style.border = `1.5px solid ${active?'var(--navy)':'var(--border)'}`;
+    row.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:${active?'var(--sky-light)':'#f8fafc'}">
+      <button onclick="toggleEditDayNew(${i})" style="min-width:36px;height:36px;border-radius:8px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};background:${active?'var(--navy)':'white'};color:${active?'white':'var(--muted)'};font-weight:700;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif">${days[i]}</button>
+      <span style="font-size:12px;color:${active?'var(--navy)':'var(--muted)'}">${active ? slots.length+'개 시간대' : '비활성'}</span>
+      ${active ? `<button onclick="addEditSlot(${i})" style="margin-left:auto;font-size:11px;padding:4px 10px;border-radius:6px;background:var(--navy);color:white;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif">+ 추가</button>` : ''}
+    </div>
+    ${active ? `<div style="padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px">
+      ${slots.map((s,si) => `<div style="display:flex;align-items:center;gap:6px">
+        <input type="time" value="${s[0]}" onchange="updateEditSlot(${i},${si},0,this.value)" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+        <span style="color:var(--muted);font-size:12px">~</span>
+        <input type="time" value="${s[1]}" onchange="updateEditSlot(${i},${si},1,this.value)" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+        ${slots.length > 1 ? `<button onclick="removeEditSlot(${i},${si})" style="width:28px;height:28px;border-radius:6px;background:var(--red-bg);color:var(--red);border:none;cursor:pointer;font-size:14px">×</button>` : '<div style="width:28px"></div>'}
+      </div>`).join('')}
+    </div>` : ''}`;
+  }
+
+  async function updateMeetingType() {
+    const id = window._editMeetingId;
+    const title = document.getElementById('emsTit').value.trim();
+    const duration = parseInt(document.getElementById('emsDur').value);
+    const bookingRange = parseInt(document.getElementById('emsRange').value);
+    const minNotice = parseInt(document.getElementById('emsNotice').value);
+    const buffer = parseInt(document.getElementById('emsBuf').value);
+    const dayTimes = window._msDayTimes || {};
+
+    if (!title) { showToast('⚠️ 제목을 입력하세요'); return; }
+    const avails = [];
+    Object.entries(dayTimes).forEach(([d, slots]) => {
+      (slots||[]).forEach(s => {
+        avails.push({ meeting_type_id: id, day_of_week: parseInt(d), start_time: s[0], end_time: s[1] });
+      });
+    });
+    if (!avails.length) { showToast('⚠️ 가능한 요일을 하나 이상 선택하세요'); return; }
+
+    await sb.from('meeting_types').update({
+      title, duration_minutes: duration,
+      booking_range_days: bookingRange, min_notice_hours: minNotice, buffer_minutes: buffer
+    }).eq('id', id);
+    await sb.from('availabilities').delete().eq('meeting_type_id', id);
+    await sb.from('availabilities').insert(avails);
+
+    document.getElementById('editMeetSetupOverlay').remove();
+    showToast('✅ 수정 완료!');
+    loadScheduleData();
+  }
+
   async function deleteMeetingType(id) {
     if (!confirm('이 미팅 섹션을 삭제할까요?')) return;
     await sb.from('meeting_types').delete().eq('id', id);
@@ -2146,22 +2342,27 @@ textarea { resize: vertical; min-height: 160px; }
   // 새 미팅 만들기 모달
   function openMeetingSetup() {
     const days = ['일','월','화','수','목','금','토'];
-    const defaultTimes = {0:'',1:'09:00-18:00',2:'09:00-18:00',3:'09:00-18:00',4:'09:00-18:00',5:'09:00-18:00',6:''};
-    window._msDayTimes = {...defaultTimes};
+    // 요일별 시간대 배열: {start, end}[]
+    window._msDayTimes = {0:[],1:[['09:00','18:00']],2:[['09:00','18:00']],3:[['09:00','18:00']],4:[['09:00','18:00']],5:[['09:00','18:00']],6:[]};
 
-    function renderDayTimeRows() {
+    function renderDayRows() {
       return days.map((d,i) => {
-        const active = window._msDayTimes[i] !== '';
-        const times = (window._msDayTimes[i]||'09:00-18:00').split('-');
-        const start = times[0]||'09:00';
-        const end = times[1]||'18:00';
-        return `<div id="dayrow${i}" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:10px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};border-radius:10px;background:${active?'var(--sky-light)':'#f8fafc'}">
-          <button onclick="toggleMsDayTime(${i})" style="min-width:36px;height:36px;border-radius:8px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};background:${active?'var(--navy)':'white'};color:${active?'white':'var(--muted)'};font-weight:700;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif">${d}</button>
-          ${active ? `
-          <input type="time" id="msS${i}" value="${start}" onchange="updateMsDayTime(${i})" style="font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none;flex:1">
-          <span style="color:var(--muted)">~</span>
-          <input type="time" id="msE${i}" value="${end}" onchange="updateMsDayTime(${i})" style="font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none;flex:1">
-          ` : `<span style="font-size:12px;color:var(--muted)">비활성 (예약 불가)</span>`}
+        const slots = window._msDayTimes[i] || [];
+        const active = slots.length > 0;
+        return `<div id="dayrow${i}" style="margin-bottom:10px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};border-radius:12px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:${active?'var(--sky-light)':'#f8fafc'}">
+            <button onclick="toggleMsDayNew(${i})" style="min-width:36px;height:36px;border-radius:8px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};background:${active?'var(--navy)':'white'};color:${active?'white':'var(--muted)'};font-weight:700;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif">${d}</button>
+            <span style="font-size:12px;color:${active?'var(--navy)':'var(--muted)'};font-weight:${active?'600':'400'}">${active ? slots.length+'개 시간대' : '비활성'}</span>
+            ${active ? `<button onclick="addMsSlot(${i})" style="margin-left:auto;font-size:11px;padding:4px 10px;border-radius:6px;background:var(--navy);color:white;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif">+ 추가</button>` : ''}
+          </div>
+          ${active ? `<div id="dayslots${i}" style="padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px">
+            ${slots.map((s,si) => `<div style="display:flex;align-items:center;gap:6px">
+              <input type="time" value="${s[0]}" onchange="updateMsSlot(${i},${si},0,this.value)" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <span style="color:var(--muted);font-size:12px">~</span>
+              <input type="time" value="${s[1]}" onchange="updateMsSlot(${i},${si},1,this.value)" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              ${slots.length > 1 ? `<button onclick="removeMsSlot(${i},${si})" style="width:28px;height:28px;border-radius:6px;background:var(--red-bg);color:var(--red);border:none;cursor:pointer;font-size:14px">×</button>` : '<div style="width:28px"></div>'}
+            </div>`).join('')}
+          </div>` : ''}
         </div>`;
       }).join('');
     }
@@ -2180,15 +2381,13 @@ textarea { resize: vertical; min-height: 160px; }
           <div style="margin-bottom:14px">
             <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">상담 시간</label>
             <select id="msDuration" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
-              <option value="30">30분</option>
-              <option value="60" selected>60분</option>
-              <option value="90">90분</option>
-              <option value="120">2시간</option>
+              <option value="30">30분</option><option value="60" selected>60분</option>
+              <option value="90">90분</option><option value="120">2시간</option>
             </select>
           </div>
           <div style="margin-bottom:14px">
             <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">요일별 가능 시간대</label>
-            <div id="dayTimeRows">${renderDayTimeRows()}</div>
+            <div id="dayTimeRows">${renderDayRows()}</div>
           </div>
           <div style="margin-bottom:14px">
             <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">예약 가능 기간</label>
@@ -2199,7 +2398,7 @@ textarea { resize: vertical; min-height: 160px; }
             </select>
           </div>
           <div style="margin-bottom:14px">
-            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">최소 예약 시간 (몇 시간 전까지)</label>
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">최소 예약 시간</label>
             <select id="msMinNotice" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
               <option value="0">제한 없음</option><option value="1">1시간 전</option>
               <option value="2">2시간 전</option><option value="4">4시간 전</option>
@@ -2221,6 +2420,54 @@ textarea { resize: vertical; min-height: 160px; }
       </div>
     </div>`;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
+  }
+
+  window.toggleMsDayNew = function(i) {
+    if (!window._msDayTimes) window._msDayTimes = {};
+    if ((window._msDayTimes[i]||[]).length > 0) {
+      window._msDayTimes[i] = [];
+    } else {
+      window._msDayTimes[i] = [['09:00','18:00']];
+    }
+    refreshDayRow(i);
+  };
+
+  window.addMsSlot = function(i) {
+    if (!window._msDayTimes[i]) window._msDayTimes[i] = [];
+    window._msDayTimes[i].push(['09:00','18:00']);
+    refreshDayRow(i);
+  };
+
+  window.removeMsSlot = function(i, si) {
+    window._msDayTimes[i].splice(si, 1);
+    refreshDayRow(i);
+  };
+
+  window.updateMsSlot = function(i, si, idx, val) {
+    if (!window._msDayTimes[i]?.[si]) return;
+    window._msDayTimes[i][si][idx] = val;
+  };
+
+  function refreshDayRow(i) {
+    const days = ['일','월','화','수','목','금','토'];
+    const slots = window._msDayTimes[i] || [];
+    const active = slots.length > 0;
+    const row = document.getElementById('dayrow'+i);
+    if (!row) return;
+    row.style.border = `1.5px solid ${active?'var(--navy)':'var(--border)'}`;
+    row.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:${active?'var(--sky-light)':'#f8fafc'}">
+      <button onclick="toggleMsDayNew(${i})" style="min-width:36px;height:36px;border-radius:8px;border:1.5px solid ${active?'var(--navy)':'var(--border)'};background:${active?'var(--navy)':'white'};color:${active?'white':'var(--muted)'};font-weight:700;cursor:pointer;font-size:13px;font-family:'Noto Sans KR',sans-serif">${days[i]}</button>
+      <span style="font-size:12px;color:${active?'var(--navy)':'var(--muted)'};font-weight:${active?'600':'400'}">${active ? slots.length+'개 시간대' : '비활성'}</span>
+      ${active ? `<button onclick="addMsSlot(${i})" style="margin-left:auto;font-size:11px;padding:4px 10px;border-radius:6px;background:var(--navy);color:white;border:none;cursor:pointer;font-family:'Noto Sans KR',sans-serif">+ 추가</button>` : ''}
+    </div>
+    ${active ? `<div id="dayslots${i}" style="padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px">
+      ${slots.map((s,si) => `<div style="display:flex;align-items:center;gap:6px">
+        <input type="time" value="${s[0]}" onchange="updateMsSlot(${i},${si},0,this.value)" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+        <span style="color:var(--muted);font-size:12px">~</span>
+        <input type="time" value="${s[1]}" onchange="updateMsSlot(${i},${si},1,this.value)" style="flex:1;font-size:13px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+        ${slots.length > 1 ? `<button onclick="removeMsSlot(${i},${si})" style="width:28px;height:28px;border-radius:6px;background:var(--red-bg);color:var(--red);border:none;cursor:pointer;font-size:14px">×</button>` : '<div style="width:28px"></div>'}
+      </div>`).join('')}
+    </div>` : ''}`;
   }
 
   window.toggleMsDayTime = function(i) {
@@ -2272,24 +2519,23 @@ textarea { resize: vertical; min-height: 160px; }
     const dayTimes = window._msDayTimes || {};
 
     if (!title) { showToast('⚠️ 제목을 입력하세요'); return; }
-    const activeDays = Object.entries(dayTimes).filter(([d,t]) => t !== '');
-    if (!activeDays.length) { showToast('⚠️ 가능한 요일을 하나 이상 선택하세요'); return; }
+    const avails = [];
+    Object.entries(dayTimes).forEach(([d, slots]) => {
+      (slots||[]).forEach(s => {
+        avails.push({ day_of_week: parseInt(d), start_time: s[0], end_time: s[1] });
+      });
+    });
+    if (!avails.length) { showToast('⚠️ 가능한 요일을 하나 이상 선택하세요'); return; }
 
     const slug = title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-가-힣]/g,'') + '-' + Date.now().toString(36);
     const {data:mt, error} = await sb.from('meeting_types').insert({
       user_id: currentUser.id, title, duration_minutes: duration,
       color: '#0f2a47', slug, is_active: true,
-      booking_range_days: bookingRange,
-      min_notice_hours: minNotice,
-      buffer_minutes: buffer
+      booking_range_days: bookingRange, min_notice_hours: minNotice, buffer_minutes: buffer
     }).select().single();
     if (error) { showToast('⚠️ 저장 실패: ' + error.message); return; }
 
-    const avails = activeDays.map(([d, t]) => {
-      const times = t.split('-');
-      return { meeting_type_id: mt.id, day_of_week: parseInt(d), start_time: times[0], end_time: times[1] };
-    });
-    await sb.from('availabilities').insert(avails);
+    await sb.from('availabilities').insert(avails.map(a => ({...a, meeting_type_id: mt.id})));
     document.getElementById('meetSetupOverlay').remove();
     showToast('✅ 미팅 섹션 저장 완료!');
     loadScheduleData();
