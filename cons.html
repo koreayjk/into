@@ -1547,25 +1547,34 @@ textarea { resize: vertical; min-height: 160px; }
     if (!name) { showToast('⚠️ 학생 이름을 입력해주세요.'); return; }
     if (!phone) { showToast('⚠️ 연락처를 입력해주세요.'); return; }
 
-    const decisionLabel = { yes:'진행 결정', no:'미진행', pending:'재연락 예정', thinking:'검토 중', '':'미정' };
-    const record = { id: Date.now(), name, phone, grade, date, consultant, channel, notes, followup, decision: selectedDecision };
+    const decisionLabel = { yes:'진행 결정', thinking:'검토 중', pending:'재연락 예정', no:'미진행', '':'미정' };
+    const record = {
+      id: Date.now(),
+      user_id: currentUser?.id,
+      name, phone, grade, date, consultant, channel, notes,
+      decision: selectedDecision || '',
+      followup
+    };
 
-    records.unshift(record);
-    localStorage.setItem('intoConsultations', JSON.stringify(records));
+    const localRec = { ...record, decision: record.decision };
+    records.unshift(localRec);
     updateStats();
     renderRecords();
     clearForm();
     showToast('💾 저장 중...');
 
     try {
-      await fetch(SHEET_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...record, decision: decisionLabel[selectedDecision || ''] })
+      const {error} = await sb.from('consultations').insert({
+        id: record.id,
+        user_id: currentUser?.id,
+        name, phone, grade, date, consultant, channel, notes,
+        decision: selectedDecision || '',
+        followup
       });
-      showToast('✅ Google Sheets에 저장 완료!');
-    } catch {
-      showToast('⚠️ 로컬 저장 완료. Sheets 전송 실패.');
+      if (error) throw error;
+      showToast('✅ 저장 완료!');
+    } catch(e) {
+      showToast('⚠️ 저장 실패: ' + e.message);
     }
   }
 
@@ -1865,11 +1874,10 @@ textarea { resize: vertical; min-height: 160px; }
 
   async function saveEdit() {
     if (currentModalIndex < 0) return;
-    const r = records[currentModalIndex];
-    const decisionLabel = { yes:'진행 결정', no:'미진행', pending:'재연락 예정', thinking:'검토 중', '':'미정' };
-
+    const rec = records[currentModalIndex];
+    const decisionLabel = { yes:'진행 결정', thinking:'검토 중', pending:'재연락 예정', no:'미진행', '':'미정' };
     const updated = {
-      ...r,
+      ...rec,
       name: document.getElementById('editName').value.trim(),
       phone: document.getElementById('editPhone').value.trim(),
       date: document.getElementById('editDate').value,
@@ -1877,30 +1885,26 @@ textarea { resize: vertical; min-height: 160px; }
       channel: getEditChannelValue(),
       notes: document.getElementById('editNotes').value.trim(),
       followup: document.getElementById('editFollowup').value.trim(),
-      decision: editDecision
+      decision: editDecision || rec.decision,
     };
-
-    if (!updated.name) { showToast('⚠️ 이름을 입력해주세요.'); return; }
-
-    // 로컬 업데이트
     records[currentModalIndex] = updated;
     localStorage.setItem('intoConsultations', JSON.stringify(records));
-    closeEditModalDirect();
+    document.getElementById('editModalOverlay').classList.remove('open');
     updateStats();
     renderRecords();
-    showToast('💾 수정 중...');
-
-    // Sheets 업데이트
+    showToast('✅ 수정 완료!');
     try {
-      await fetch(SHEET_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'update', ...updated, decision: decisionLabel[editDecision || ''] })
-      });
-      showToast('✅ 수정 완료!');
-    } catch {
-      showToast('⚠️ 로컬 수정 완료. Sheets 업데이트 실패.');
-    }
+      await sb.from('consultations').update({
+        name: updated.name,
+        phone: updated.phone,
+        date: updated.date,
+        consultant: updated.consultant,
+        channel: updated.channel,
+        notes: updated.notes,
+        followup: updated.followup,
+        decision: updated.decision,
+      }).eq('id', rec.id);
+    } catch(e) { showToast('⚠️ 서버 수정 실패: ' + e.message); }
   }
 
   function closeEditModal(e) { if (e.target === document.getElementById('editModalOverlay')) closeEditModalDirect(); }
@@ -2262,37 +2266,32 @@ textarea { resize: vertical; min-height: 160px; }
       if (list) list.innerHTML = '<div class="empty-state"><div class="ei">⏳</div><p>불러오는 중...</p></div>';
     }
     try {
-      const res = await fetch(SHEET_URL + '?sheet=First&t=' + Date.now(), { redirect: 'follow' });
-      const data = await res.json();
+      const {data, error} = await sb.from('first_consultations').select('*').order('created_at', {ascending:false});
+      if (error) throw error;
       if (Array.isArray(data) && data.length) {
-        const dm = {'진행 결정':'yes','검토 중':'thinking','재연락 예정':'pending','미진행':'no'};
-        firstRecords = data.map(row => ({
-          id: row['id'] || Date.now() + Math.random(),
-          name: (row['이름(한글)'] || row['이름'] || '') + (row['이름(영어)'] ? ' (' + row['이름(영어)'] + ')' : ''),
-          phone: row['전화번호'] || row['연락처'] || '',
-          grade: row['학년'] || '',
-          date: String(row['상담일자'] || '').substring(0, 10),
-          consultant: row['작성자'] || '',
-          channel: row['유입경로'] || '',
-          notes: row['추가상담내용'] || row['유학목적'] || '',
-          decision: dm[row['결정여부']] || '',
-          followup: row['희망지역'] || '',
-          writer: row['작성자'] || '',
-          studyType: row['유학형태'] || '',
-          studyDate: row['유학시기'] || '',
-          englishLevel: row['영어수준'] || '',
-          testScore: row['시험점수'] || '',
-          purpose: row['유학목적'] || '',
-          region: row['희망지역'] || '',
-          email: row['이메일'] || '',
-          birth: row['생년월일'] || '',
+        firstRecords = data.map(r => ({
+          id: r.id,
+          name: (r.name_ko || '') + (r.name_en ? ' (' + r.name_en + ')' : ''),
+          phone: r.phone || '',
+          email: r.email || '',
+          birth: r.birth || '',
+          date: r.date || '',
+          writer: r.writer || '',
+          channel: r.channel || '',
+          studyType: r.study_type || '',
+          studyDate: r.study_date || '',
+          englishLevel: r.english_level || '',
+          testScore: r.test_score || '',
+          purpose: r.purpose || '',
+          region: r.region || '',
+          notes: r.notes || ''
         })).filter(r => r.name);
         localStorage.setItem('firstConsultations', JSON.stringify(firstRecords));
         updateFirstBadge();
         const fp = document.getElementById('firstPanel');
         if (fp && !fp.classList.contains('hidden')) renderFirstRecords();
       }
-    } catch { console.log('1차상담 load failed'); }
+    } catch(e) { console.log('first consultations load error', e); }
   }
 
   function renderFirstRecords() {
@@ -2433,13 +2432,9 @@ textarea { resize: vertical; min-height: 160px; }
     renderFirstRecords();
     showToast('🗑️ 삭제 중...');
     try {
-      await fetch(SHEET_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', id: String(rec.id), sheetName: 'First' })
-      });
+      await sb.from('first_consultations').delete().eq('id', rec.id);
       showToast('✅ 삭제 완료!');
-    } catch { showToast('⚠️ 로컬 삭제 완료.'); }
+    } catch(e) { showToast('⚠️ 삭제 실패: ' + e.message); }
   }
   // ────────────────────────────────────────
 
@@ -2448,7 +2443,7 @@ textarea { resize: vertical; min-height: 160px; }
   let inquiryStatus = JSON.parse(localStorage.getItem('inquiryStatus') || '{}');
 
   function updateInquiryBadge() {
-    const pending = inquiries.filter(r => (inquiryStatus[r['신청일시']] || '대기중') === '대기중').length;
+    const pending = inquiries.filter(r => (r['_status'] || '대기중') === '대기중').length;
     const badge = document.getElementById('inquiryBadge');
     if (!badge) return;
     if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline-block'; }
@@ -2472,19 +2467,29 @@ textarea { resize: vertical; min-height: 160px; }
       }
     }
     try {
-      const res = await fetch(SHEET_URL + '?type=inquiry&t=' + Date.now(), { redirect: 'follow' });
-      const data = await res.json();
+      const {data, error} = await sb.from('inquiries').select('*').order('created_at', {ascending:false});
+      if (error) throw error;
       if (Array.isArray(data)) {
-        inquiries = data;
+        inquiries = data.map(r => ({
+          '신청일시': r.created_at,
+          '이름': r.name,
+          '연락처': r.phone,
+          '카카오톡ID': r.kakao,
+          '학년': r.grade,
+          '관심국가': r.country,
+          '문의내용': r.message,
+          '개인정보동의': r.agree ? '동의' : '미동의',
+          '_id': r.id,
+          '_status': r.status || '대기중'
+        }));
         renderInquiries();
         updateInquiryBadge();
-        // 상담 신청 목록 뷰일 때 topBadge도 업데이트
         const ip = document.getElementById('inquiryPanel');
         if (ip && !ip.classList.contains('hidden')) {
           document.getElementById('topBadge').textContent = inquiries.length + '건';
         }
       }
-    } catch {
+    } catch(e) {
       const list = document.getElementById('inquiryList');
       if (list) list.innerHTML = '<div class="empty-state"><div class="ei">📩</div><p>데이터를 불러올 수 없습니다.</p></div>';
     }
@@ -2558,13 +2563,12 @@ textarea { resize: vertical; min-height: 160px; }
     document.getElementById('modalOverlay').classList.add('open');
   }
 
-  function toggleInquiryStatusModal(index) {
+  async function toggleInquiryStatusModal(index) {
     const r = inquiries[index];
-    const key = r['신청일시'];
-    const current = inquiryStatus[key] || '대기중';
-    inquiryStatus[key] = current === '대기중' ? '처리완료' : '대기중';
-    localStorage.setItem('inquiryStatus', JSON.stringify(inquiryStatus));
+    const newStatus = (r['_status'] || '대기중') === '대기중' ? '처리완료' : '대기중';
+    inquiries[index]['_status'] = newStatus;
     updateInquiryBadge();
+    try { await sb.from('inquiries').update({status: newStatus}).eq('id', r['_id']); } catch(e) {}
     // 모달 다시 열기
     closeModalDirect();
     setTimeout(() => openInquiryModal(index), 50);
@@ -2580,13 +2584,9 @@ textarea { resize: vertical; min-height: 160px; }
     renderInquiries();
     showToast('🗑️ 삭제 중...');
     try {
-      await fetch(SHEET_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'deleteInquiry', date: r['신청일시'], name: r['이름'] })
-      });
+      await sb.from('inquiries').delete().eq('id', r['_id']);
       showToast('✅ 삭제 완료!');
-    } catch { showToast('⚠️ 로컬 삭제 완료. Sheets 삭제 실패.'); }
+    } catch(e) { showToast('⚠️ 삭제 실패: ' + e.message); }
   }
 
   function openInquiryEditModal() {
@@ -2673,41 +2673,25 @@ textarea { resize: vertical; min-height: 160px; }
   // Sheets에서 데이터 불러오기
   async function loadFromSheets() {
     try {
-      const res = await fetch(SHEET_URL + '?t=' + Date.now(), {
-        method: 'GET',
-        redirect: 'follow',
-      });
-      const sheetData = await res.json();
-      if (!Array.isArray(sheetData) || sheetData.length === 0) return;
-
-      const decisionMap = { '진행 결정':'yes', '검토 중':'thinking', '재연락 예정':'pending', '미진행':'no' };
-
-      const loaded = sheetData.map(row => ({
-        id: row['id'] || Date.now() + Math.random(),
-        name: row['이름'] || '',
-        phone: row['연락처'] || '',
-        grade: row['학년'] || '',
-        date: row['상담일자'] || '',
-        consultant: row['상담자'] || '',
-        channel: row['유입경로'] || '',
-        notes: row['상담내용'] || '',
-        decision: decisionMap[row['결정여부']] || '',
-        followup: row['팔로업'] || ''
-      })).filter(r => r.name);
-
-      if (loaded.length > 0) {
-        records = loaded.reverse().map(r => ({
-          ...r,
-          date: r.date ? String(r.date).substring(0, 10) : ''
-        }));
-        // Sheets 데이터로 완전히 교체 (중복 방지)
-        localStorage.setItem('intoConsultations', JSON.stringify(records));
-        updateStats();
-        renderRecords();
-      }
-    } catch(e) {
-      console.log('Sheets 로드 실패, 로컬 데이터 사용');
-    }
+      const {data, error} = await sb.from('consultations').select('*').order('created_at', {ascending:false});
+      if (error || !data?.length) return;
+      const decisionMap = {'진행 결정':'yes','검토 중':'thinking','재연락 예정':'pending','미진행':'no'};
+      records = data.map(r => ({
+        id: r.id,
+        name: r.name || '',
+        phone: r.phone || '',
+        grade: r.grade || '',
+        date: r.date || '',
+        consultant: r.consultant || '',
+        channel: r.channel || '',
+        notes: r.notes || '',
+        decision: r.decision || '',
+        followup: r.followup || ''
+      }));
+      localStorage.setItem('intoConsultations', JSON.stringify(records));
+      updateStats();
+      renderRecords();
+    } catch(e) { console.log('load consultations error', e); }
   }
 
   loadFromSheets();
