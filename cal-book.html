@@ -192,7 +192,11 @@ function renderCalendar(c) {
     const date = new Date(currentYear, currentMonth, d);
     const ds = fmtDate(date);
     const isPast = date < new Date(today.getFullYear(),today.getMonth(),today.getDate());
-    const avail = availDays.has(date.getDay()) && !isPast;
+    // 예약 가능 기간 제한
+    const maxDays = meetingType.booking_range_days || 30;
+    const maxDate = new Date(today.getFullYear(),today.getMonth(),today.getDate() + maxDays);
+    const isTooFar = date > maxDate;
+    const avail = availDays.has(date.getDay()) && !isPast && !isTooFar;
     const sel = ds===selectedDate;
     const isToday = date.toDateString()===today.toDateString();
     let cls='cal-day'+(avail?' avail':'  unavail')+(sel?' selected':'')+(isToday?' today':'');
@@ -229,6 +233,11 @@ function renderTimeSlots(c) {
   const avail = availabilities.find(a=>a.day_of_week===dow);
   const slots = generateSlots(avail?.start_time||'09:00', avail?.end_time||'18:00', meetingType.duration_minutes);
   const booked = new Set(bookedSlots.filter(b=>b.date===selectedDate).map(b=>b.start_time));
+  // 최소 예약 시간 체크
+  const minNoticeHours = meetingType.min_notice_hours || 0;
+  const bufferMins = meetingType.buffer_minutes || 0;
+  const nowPlus = new Date(Date.now() + minNoticeHours * 3600000);
+  const buffer = meetingType.buffer_minutes || 0;
   const days=['일','월','화','수','목','금','토'];
 
   c.innerHTML = `
@@ -240,8 +249,19 @@ function renderTimeSlots(c) {
         ${slots.map(s => {
           const isBooked = booked.has(s.start);
           const isSel = selectedSlot?.start===s.start;
-          return `<div class="slot${isBooked?' booked':isSel?' selected':''}" ${!isBooked?`onclick="selectSlot('${s.start}','${s.end}',this)"`:''}>
-            ${s.start}
+          // 최소 예약 시간 체크
+          const slotDateTime = new Date(selectedDate + 'T' + s.start + ':00');
+          const isTooSoon = minNoticeHours > 0 && slotDateTime < nowPlus;
+          // 버퍼 체크: 예약된 슬롯 전후 buffer분 내 슬롯 비활성화
+          const isBuffered = bufferMins > 0 && [...booked].some(bt => {
+            const bookedMins = parseInt(bt.split(':')[0])*60 + parseInt(bt.split(':')[1]);
+            const slotMins = parseInt(s.start.split(':')[0])*60 + parseInt(s.start.split(':')[1]);
+            return Math.abs(bookedMins - slotMins) < bufferMins && bookedMins !== slotMins;
+          });
+          const disabled = isBooked || isTooSoon || isBuffered;
+          const isSel = selectedSlot?.start===s.start;
+          return `<div class="slot${disabled?' booked':isSel?' selected':''}" ${!disabled?`onclick="selectSlot('${s.start}','${s.end}',this)"`:''}>
+            ${s.start}${isTooSoon?' 🔒':''}
           </div>`;
         }).join('')}
       </div>
@@ -311,7 +331,8 @@ async function submitBooking() {
   if (!phone) { showToast('⚠️ 전화번호를 입력하세요'); return; }
 
   showToast('💾 예약 중...');
-  const {error} = await sb.from('bookings').insert({
+  let bookingId = null;
+  const {data:newBooking, error} = await sb.from('bookings').insert({
     meeting_type_id: meetingType.id,
     host_id: hostProfile.id,
     date: selectedDate,
@@ -321,9 +342,10 @@ async function submitBooking() {
     guest_phone: phone,
     guest_email: email,
     note, status:'confirmed'
-  });
+  }).select().single();
 
   if (error) { showToast('⚠️ 예약 실패. 다시 시도해주세요.'); return; }
+  bookingId = newBooking?.id || '';
   bookedSlots.push({date:selectedDate, start_time:selectedSlot.start});
 
   // 상담자에게 이메일 알림 (Supabase Auth로 이메일 가져오기)
@@ -364,8 +386,25 @@ async function submitBooking() {
       <div class="s-row"><span class="sl">시간</span><span class="sv">${selectedSlot.start} ~ ${selectedSlot.end}</span></div>
       <div class="s-row"><span class="sl">미팅</span><span class="sv">${meetingType.title}</span></div>
     </div>
+    <p style="font-size:12px;color:#64748b;margin-top:16px;margin-bottom:8px">예약을 취소하려면 아래 버튼을 누르세요</p>
+    <button onclick="cancelBooking('${bookingId}')" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;padding:10px 20px;border-radius:8px;background:white;color:#dc2626;border:1.5px solid #dc2626;cursor:pointer;width:100%">예약 취소</button>
   </div>`;
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function cancelBooking(id) {
+  if (!id) { showToast('⚠️ 예약 ID를 찾을 수 없습니다'); return; }
+  if (!confirm('정말 예약을 취소하시겠습니까?')) return;
+  const {error} = await sb.from('bookings').update({status:'cancelled'}).eq('id', id);
+  if (error) { showToast('⚠️ 취소 실패. 다시 시도해주세요.'); return; }
+  bookedSlots = bookedSlots.filter(b => !(b.date===selectedDate && b.start_time===selectedSlot?.start));
+  const c = document.getElementById('stepContent');
+  c.innerHTML = `<div class="success">
+    <div class="s-icon">✅</div>
+    <div class="s-title">예약이 취소되었습니다</div>
+    <div class="s-sub">언제든지 다시 예약하실 수 있습니다.</div>
+    <button onclick="location.reload()" style="font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:700;padding:13px 28px;border-radius:10px;background:#0f2a47;color:white;border:none;cursor:pointer">새 예약하기</button>
+  </div>`;
 }
 
 function fmtDate(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
