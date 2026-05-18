@@ -1380,24 +1380,30 @@ textarea { resize: vertical; min-height: 160px; }
   let currentUser = null;
   let currentProfile = null;
 
-  function checkLogin() {
-    const saved = sessionStorage.getItem('into_auth');
-    if (saved === 'ok') {
+  async function checkLogin() {
+    const {data:{session}} = await sb.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      const {data:profile} = await sb.from('consultant_profiles').select('*').eq('id', currentUser.id).single();
+      currentProfile = profile;
       document.getElementById('loginOverlay').classList.add('hidden');
+      initApp();
     }
   }
 
-  function doLogin() {
+  async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
     const pw = document.getElementById('loginPw').value;
-    if (pw === PASSWORD) {
-      sessionStorage.setItem('into_auth', 'ok');
-      document.getElementById('loginOverlay').classList.add('hidden');
-      document.getElementById('loginError').textContent = '';
-    } else {
-      document.getElementById('loginError').textContent = '❌ 비밀번호가 틀렸습니다.';
-      document.getElementById('loginPw').value = '';
-      document.getElementById('loginPw').focus();
-    }
+    document.getElementById('loginError').textContent = '';
+    if (!email || !pw) { document.getElementById('loginError').textContent = '이메일과 비밀번호를 입력하세요'; return; }
+    const {data, error} = await sb.auth.signInWithPassword({email, password: pw});
+    if (error) { document.getElementById('loginError').textContent = '❌ 이메일 또는 비밀번호가 틀렸습니다.'; return; }
+    currentUser = data.user;
+    const {data:profile} = await sb.from('consultant_profiles').select('*').eq('id', currentUser.id).single();
+    currentProfile = profile;
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('loginError').textContent = '';
+    initApp();
   }
 
   window.switchLoginTab = function(tab) {
@@ -1433,6 +1439,16 @@ textarea { resize: vertical; min-height: 160px; }
   function togglePw() {
     const input = document.getElementById('loginPw');
     input.type = input.type === 'password' ? 'text' : 'password';
+  }
+
+  function initApp() {
+    updateStats();
+    renderRecords();
+    loadFromSheets();
+    loadInquiries(true);
+    loadFirstRecords(true);
+    setTimeout(updateFirstBadge, 500);
+    loadAdminData();
   }
 
   checkLogin();
