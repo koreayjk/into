@@ -435,17 +435,12 @@
       // 로그인한 유저 확인
       const {data:{session}} = await sb.auth.getSession();
       if (session) {
-        const {data} = await sb.from('cons_admin_settings').select('*').eq('user_id', session.user.id).single();
-        if (data) {
-          if (data.consultants?.length) data.consultants = data.consultants;
-          if (data.channels?.length) data.channels = data.channels;
-          if (data.kcpa?.length) data.kcpa = data.kcpa;
-          if (data.academy?.length) data.academy = data.academy;
-          // 로컬에 저장
-          if (data.consultants) { window.data.consultants = data.consultants; localStorage.setItem('admin_consultants', JSON.stringify(data.consultants)); }
-          if (data.channels) { window.data.channels = data.channels; localStorage.setItem('admin_channels', JSON.stringify(data.channels)); }
-          if (data.kcpa) { window.data.kcpa = data.kcpa; localStorage.setItem('admin_kcpa', JSON.stringify(data.kcpa)); }
-          if (data.academy) { window.data.academy = data.academy; localStorage.setItem('admin_academy', JSON.stringify(data.academy)); }
+        const {data: settings} = await sb.from('cons_admin_settings').select('*').eq('user_id', session.user.id).single();
+        if (settings) {
+          if (settings.consultants?.length) { data.consultants = settings.consultants; localStorage.setItem('admin_consultants', JSON.stringify(settings.consultants)); }
+          if (settings.channels?.length) { data.channels = settings.channels; localStorage.setItem('admin_channels', JSON.stringify(settings.channels)); }
+          if (settings.kcpa?.length) { data.kcpa = settings.kcpa; localStorage.setItem('admin_kcpa', JSON.stringify(settings.kcpa)); }
+          if (settings.academy?.length) { data.academy = settings.academy; localStorage.setItem('admin_academy', JSON.stringify(settings.academy)); }
         }
       }
     } catch(e) { console.log('load error', e); }
