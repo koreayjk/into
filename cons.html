@@ -2193,6 +2193,14 @@ textarea { resize: vertical; min-height: 160px; }
             </select>
           </div>
           <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">내 시간대 (상담자 기준)</label>
+            <select id="emsTz" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              ${['America/Chicago','America/New_York','America/Los_Angeles','Asia/Seoul','Asia/Tokyo','Asia/Manila','Asia/Kuala_Lumpur','America/Vancouver','America/Toronto','Pacific/Auckland','Australia/Sydney','Europe/London'].map(tz =>
+                `<option value="${tz}" ${mt.timezone===tz?'selected':''}>${tz}</option>`
+              ).join('')}
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
             <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">요일별 가능 시간대</label>
             <div id="editDayTimeRows">${renderEditDayRows()}</div>
           </div>
@@ -2320,8 +2328,9 @@ textarea { resize: vertical; min-height: 160px; }
     });
     if (!avails.length) { showToast('⚠️ 가능한 요일을 하나 이상 선택하세요'); return; }
 
+    const editTz = document.getElementById('emsTz').value;
     await sb.from('meeting_types').update({
-      title, duration_minutes: duration,
+      title, duration_minutes: duration, timezone: editTz,
       booking_range_days: bookingRange, min_notice_hours: minNotice, buffer_minutes: buffer
     }).eq('id', id);
     await sb.from('availabilities').delete().eq('meeting_type_id', id);
@@ -2383,6 +2392,23 @@ textarea { resize: vertical; min-height: 160px; }
             <select id="msDuration" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
               <option value="30">30분</option><option value="60" selected>60분</option>
               <option value="90">90분</option><option value="120">2시간</option>
+            </select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px">내 시간대 (상담자 기준)</label>
+            <select id="msTimezone" style="font-family:'Noto Sans KR',sans-serif;font-size:13px;width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;outline:none">
+              <option value="America/Chicago">미국 중부 (CST/CDT) - 텍사스</option>
+              <option value="America/New_York">미국 동부 (EST/EDT)</option>
+              <option value="America/Los_Angeles">미국 서부 (PST/PDT)</option>
+              <option value="Asia/Seoul">한국 (KST)</option>
+              <option value="Asia/Tokyo">일본 (JST)</option>
+              <option value="Asia/Manila">필리핀 (PST)</option>
+              <option value="Asia/Kuala_Lumpur">말레이시아 (MYT)</option>
+              <option value="America/Vancouver">캐나다 밴쿠버 (PST/PDT)</option>
+              <option value="America/Toronto">캐나다 토론토 (EST/EDT)</option>
+              <option value="Pacific/Auckland">뉴질랜드 (NZST)</option>
+              <option value="Australia/Sydney">호주 시드니 (AEST)</option>
+              <option value="Europe/London">영국 (GMT/BST)</option>
             </select>
           </div>
           <div style="margin-bottom:14px">
@@ -2528,9 +2554,10 @@ textarea { resize: vertical; min-height: 160px; }
     if (!avails.length) { showToast('⚠️ 가능한 요일을 하나 이상 선택하세요'); return; }
 
     const slug = title.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-가-힣]/g,'') + '-' + Date.now().toString(36);
+    const timezone = document.getElementById('msTimezone').value;
     const {data:mt, error} = await sb.from('meeting_types').insert({
       user_id: currentUser.id, title, duration_minutes: duration,
-      color: '#0f2a47', slug, is_active: true,
+      color: '#0f2a47', slug, is_active: true, timezone,
       booking_range_days: bookingRange, min_notice_hours: minNotice, buffer_minutes: buffer
     }).select().single();
     if (error) { showToast('⚠️ 저장 실패: ' + error.message); return; }
