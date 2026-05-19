@@ -449,6 +449,7 @@
 
   function renderList(containerId, arr, deleteFunc) {
     const el = document.getElementById(containerId);
+    if (!el) return;
     if (arr.length === 0) {
       el.innerHTML = '<div class="empty-note">항목이 없습니다.</div>';
       return;
@@ -462,6 +463,7 @@
   }
 
   function renderAll() {
+    if (!data || !data.consultants) return;
     renderList('consultantList', data.consultants, 'deleteConsultant');
     renderList('channelList', data.channels, 'deleteChannel');
     renderList('kcpaList', data.kcpa, 'deleteKcpa');
