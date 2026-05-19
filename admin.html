@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>INTO유학CENTER — 어드민</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -396,7 +397,9 @@
 
 <script>
   const PIN = '2414';
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzla7nk3JEMasIHJYvzJNCR2D4Bl8ZEJNM1dIiaUC9sVW6mjRJZQvyKE0WFTbIQUSSy/exec';
+  const SUPA_URL = 'https://illbgsjvhsciougzjgwn.supabase.co';
+  const SUPA_KEY = 'sb_publishable_EmIn4ZpTksxxbq7vXWTk4w_Wc38j9yH';
+  const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
   // Default data
   const DEFAULT = {
@@ -429,18 +432,23 @@
 
   async function loadFromSheets() {
     try {
-      const res = await fetch(SHEET_URL + '?type=admin&t=' + Date.now(), { redirect: 'follow' });
-      const sheetsData = await res.json();
-      if (sheetsData && sheetsData.consultants) {
-        data.consultants = sheetsData.consultants;
-        data.channels = sheetsData.channels;
-        data.kcpa = sheetsData.kcpa;
-        data.academy = sheetsData.academy;
-        localStorage.setItem('admin_settings', JSON.stringify(data));
+      // 로그인한 유저 확인
+      const {data:{session}} = await sb.auth.getSession();
+      if (session) {
+        const {data} = await sb.from('cons_admin_settings').select('*').eq('user_id', session.user.id).single();
+        if (data) {
+          if (data.consultants?.length) data.consultants = data.consultants;
+          if (data.channels?.length) data.channels = data.channels;
+          if (data.kcpa?.length) data.kcpa = data.kcpa;
+          if (data.academy?.length) data.academy = data.academy;
+          // 로컬에 저장
+          if (data.consultants) { window.data.consultants = data.consultants; localStorage.setItem('admin_consultants', JSON.stringify(data.consultants)); }
+          if (data.channels) { window.data.channels = data.channels; localStorage.setItem('admin_channels', JSON.stringify(data.channels)); }
+          if (data.kcpa) { window.data.kcpa = data.kcpa; localStorage.setItem('admin_kcpa', JSON.stringify(data.kcpa)); }
+          if (data.academy) { window.data.academy = data.academy; localStorage.setItem('admin_academy', JSON.stringify(data.academy)); }
+        }
       }
-    } catch(e) {
-      console.log('Sheets load failed, using local data');
-    }
+    } catch(e) { console.log('load error', e); }
     renderAll();
   }
 
@@ -522,25 +530,29 @@
   }
 
   async function saveAll() {
-    // 로컬 저장 (하위 호환)
+    // 로컬 저장
     localStorage.setItem('admin_consultants', JSON.stringify(data.consultants));
     localStorage.setItem('admin_channels', JSON.stringify(data.channels));
     localStorage.setItem('admin_kcpa', JSON.stringify(data.kcpa));
     localStorage.setItem('admin_academy', JSON.stringify(data.academy));
-    // 통합 저장
     localStorage.setItem('admin_settings', JSON.stringify(data));
-    showToast('💾 저장 중...');
-    // Sheets에 저장
+
+    // Supabase 저장
     try {
-      await fetch(SHEET_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'saveAdmin', data: data })
-      });
-      showToast('✅ 모든 기기에 저장 완료!');
-    } catch {
-      showToast('✅ 로컬 저장 완료. (Sheets 저장 실패)');
-    }
+      const {data:{session}} = await sb.auth.getSession();
+      if (session) {
+        await sb.from('cons_admin_settings').upsert({
+          user_id: session.user.id,
+          consultants: data.consultants,
+          channels: data.channels,
+          kcpa: data.kcpa,
+          academy: data.academy,
+          updated_at: new Date().toISOString()
+        }, {onConflict: 'user_id'});
+      }
+    } catch(e) { console.log('save error', e); }
+
+    showToast('✅ 저장 완료!');
   }
 
   function showToast(msg) {
