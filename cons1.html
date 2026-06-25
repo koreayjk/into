@@ -355,12 +355,23 @@ function getAdminData(){
 }
 
 async function loadAdminData(){
+  // 어드민에서 저장한 공용 설정('shared' 행)을 Supabase 에서 읽어온다.
+  // → 어떤 기기/브라우저에서 수정해도 cons1 에 동일하게 반영됨.
   try{
-    const res=await fetch(SHEET_URL+'?type=admin&t='+Date.now(),{redirect:'follow'});
-    const data=await res.json();
-    if(data&&data.consultants){localStorage.setItem('admin_settings',JSON.stringify(data));}
-  }catch(e){}
+    const {data,error}=await sb2.from('cons_admin_settings').select('*').eq('user_id','shared').single();
+    if(!error && data){
+      const merged={
+        consultants:Array.isArray(data.consultants)?data.consultants:DEFAULT.consultants,
+        kcpa:Array.isArray(data.kcpa)?data.kcpa:DEFAULT.kcpa,
+        academy:Array.isArray(data.academy)?data.academy:DEFAULT.academy
+      };
+      localStorage.setItem('admin_settings',JSON.stringify(merged));
+    }
+  }catch(e){ console.log('admin load error',e); }
   populateSelects();
+  // 이미 유형이 선택돼 있으면 드롭다운을 새 값으로 다시 채운다.
+  const t=document.getElementById('writerType');
+  if(t && t.value) onWriterTypeChange();
 }
 
 function populateSelects(){

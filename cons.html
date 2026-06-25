@@ -1488,6 +1488,22 @@ textarea { resize: vertical; min-height: 160px; }
   }
 
   async function loadAdminFromSheets() {
+    // 1순위: 어드민이 저장한 공용 설정('shared' 행) - 모든 기기 공통
+    try {
+      const {data, error} = await sb.from('cons_admin_settings').select('*').eq('user_id', 'shared').single();
+      if (!error && data && (Array.isArray(data.consultants) || Array.isArray(data.channels))) {
+        const merged = {
+          consultants: Array.isArray(data.consultants) ? data.consultants : DEFAULT.consultants,
+          channels: Array.isArray(data.channels) ? data.channels : DEFAULT.channels,
+          kcpa: Array.isArray(data.kcpa) ? data.kcpa : DEFAULT.kcpa,
+          academy: Array.isArray(data.academy) ? data.academy : DEFAULT.academy
+        };
+        localStorage.setItem('admin_settings', JSON.stringify(merged));
+        populateSelects();
+        return;
+      }
+    } catch(e) { console.log('shared admin load failed', e); }
+    // 2순위(폴백): 기존 구글시트
     try {
       const res = await fetch(SHEET_URL + '?type=admin&t=' + Date.now(), { redirect: 'follow' });
       const data = await res.json();
