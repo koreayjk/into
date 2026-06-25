@@ -332,6 +332,7 @@ const PASSWORD = '1234';
 const SUPA_URL2 = 'https://illbgsjvhsciougzjgwn.supabase.co';
 const SUPA_KEY2 = 'sb_publishable_EmIn4ZpTksxxbq7vXWTk4w_Wc38j9yH';
 const sb2 = window.supabase.createClient(SUPA_URL2, SUPA_KEY2);
+const SHARED_ID = '00000000-0000-0000-0000-000000000000';
 
 // ── LOGIN ──
 function checkLogin(){if(sessionStorage.getItem('into_auth_cons1')==='ok')document.getElementById('loginOverlay').classList.add('hidden')}
@@ -358,7 +359,7 @@ async function loadAdminData(){
   // 어드민에서 저장한 공용 설정('shared' 행)을 Supabase 에서 읽어온다.
   // → 어떤 기기/브라우저에서 수정해도 cons1 에 동일하게 반영됨.
   try{
-    const {data,error}=await sb2.from('cons_admin_settings').select('*').eq('user_id','shared').single();
+    const {data,error}=await sb2.from('cons_admin_settings').select('*').eq('user_id',SHARED_ID).single();
     if(!error && data){
       const merged={
         consultants:Array.isArray(data.consultants)?data.consultants:DEFAULT.consultants,
