@@ -437,10 +437,18 @@
       if (session) {
         const {data: settings} = await sb.from('cons_admin_settings').select('*').eq('user_id', session.user.id).single();
         if (settings) {
-          if (settings.consultants?.length) { data.consultants = settings.consultants; localStorage.setItem('admin_consultants', JSON.stringify(settings.consultants)); }
-          if (settings.channels?.length) { data.channels = settings.channels; localStorage.setItem('admin_channels', JSON.stringify(settings.channels)); }
-          if (settings.kcpa?.length) { data.kcpa = settings.kcpa; localStorage.setItem('admin_kcpa', JSON.stringify(settings.kcpa)); }
-          if (settings.academy?.length) { data.academy = settings.academy; localStorage.setItem('admin_academy', JSON.stringify(settings.academy)); }
+          // 로컬 편집이 서버보다 최신이면 서버(이전) 데이터로 덮어쓰지 않는다.
+          // (서버 저장이 실패했더라도 삭제한 멤버가 되살아나지 않도록 함)
+          const localTs = localStorage.getItem('admin_updated_at') || '';
+          const remoteTs = settings.updated_at || '';
+          const remoteIsNewer = !localTs || (remoteTs && remoteTs > localTs);
+          if (remoteIsNewer) {
+            if (Array.isArray(settings.consultants)) { data.consultants = settings.consultants; localStorage.setItem('admin_consultants', JSON.stringify(settings.consultants)); }
+            if (Array.isArray(settings.channels)) { data.channels = settings.channels; localStorage.setItem('admin_channels', JSON.stringify(settings.channels)); }
+            if (Array.isArray(settings.kcpa)) { data.kcpa = settings.kcpa; localStorage.setItem('admin_kcpa', JSON.stringify(settings.kcpa)); }
+            if (Array.isArray(settings.academy)) { data.academy = settings.academy; localStorage.setItem('admin_academy', JSON.stringify(settings.academy)); }
+            if (remoteTs) localStorage.setItem('admin_updated_at', remoteTs);
+          }
         }
       }
     } catch(e) { console.log('load error', e); }
@@ -527,29 +535,39 @@
   }
 
   async function saveAll() {
-    // 로컬 저장
+    const ts = new Date().toISOString();
+
+    // 로컬 저장 (이 기기의 기준 데이터 + 편집 시각 기록)
     localStorage.setItem('admin_consultants', JSON.stringify(data.consultants));
     localStorage.setItem('admin_channels', JSON.stringify(data.channels));
     localStorage.setItem('admin_kcpa', JSON.stringify(data.kcpa));
     localStorage.setItem('admin_academy', JSON.stringify(data.academy));
     localStorage.setItem('admin_settings', JSON.stringify(data));
+    localStorage.setItem('admin_updated_at', ts);
 
-    // Supabase 저장
+    // Supabase 저장 (실패 시 사실대로 알려준다)
+    let remoteOk = null; // null=세션 없음(서버 저장 생략), true=성공, false=실패
     try {
       const {data:{session}} = await sb.auth.getSession();
       if (session) {
-        await sb.from('cons_admin_settings').upsert({
+        const {error} = await sb.from('cons_admin_settings').upsert({
           user_id: session.user.id,
           consultants: data.consultants,
           channels: data.channels,
           kcpa: data.kcpa,
           academy: data.academy,
-          updated_at: new Date().toISOString()
+          updated_at: ts
         }, {onConflict: 'user_id'});
+        remoteOk = !error;
+        if (error) console.log('save error', error);
       }
-    } catch(e) { console.log('save error', e); }
+    } catch(e) { remoteOk = false; console.log('save error', e); }
 
-    showToast('✅ 저장 완료!');
+    if (remoteOk === false) {
+      showToast('⚠️ 이 기기에는 저장됐지만 서버 저장은 실패했습니다.');
+    } else {
+      showToast('✅ 저장 완료!');
+    }
   }
 
   function showToast(msg) {
