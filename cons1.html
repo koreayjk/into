@@ -176,7 +176,7 @@ textarea{resize:vertical;min-height:100px}
           <label class="lbl">작성자 유형</label>
           <select id="writerType" onchange="onWriterTypeChange()">
             <option value="">선택</option>
-            <option value="KCPA">KCPA</option>
+            <option value="상담실장">상담실장</option>
             <option value="MOU학원">MOU학원</option>
           </select>
         </div>
@@ -347,7 +347,7 @@ checkLogin();
 // ── ADMIN DATA ──
 const DEFAULT = {
   consultants: ['Moses Yu','스태프 A','스태프 B'],
-  kcpa: ['KCPA 멤버1','KCPA 멤버2','KCPA 멤버3','KCPA 멤버4','KCPA 멤버5'],
+  kcpa: ['상담실장1','상담실장2','상담실장3','상담실장4','상담실장5'],
   academy: ['학원1','학원2','학원3','학원4','학원5']
 };
 
@@ -383,8 +383,8 @@ function onWriterTypeChange(){
   const type=document.getElementById('writerType').value;
   const a=getAdminData();
   const sel=document.getElementById('writerName');
-  if(type==='KCPA'){
-    sel.innerHTML='<option value="">KCPA 선택</option>'+(a.kcpa||DEFAULT.kcpa).map(x=>`<option value="${x}">${x}</option>`).join('');
+  if(type==='상담실장'){
+    sel.innerHTML='<option value="">상담실장 선택</option>'+(a.kcpa||DEFAULT.kcpa).map(x=>`<option value="${x}">${x}</option>`).join('');
   } else if(type==='MOU학원'){
     sel.innerHTML='<option value="">학원 선택</option>'+(a.academy||DEFAULT.academy).map(x=>`<option value="${x}">${x}</option>`).join('');
   } else {
