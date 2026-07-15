@@ -1463,7 +1463,7 @@ textarea { resize: vertical; min-height: 160px; }
     loadInquiries(true);
     loadFirstRecords(true);
     setTimeout(updateFirstBadge, 500);
-    loadAdminData();
+    loadAdminFromSheets();
   }
 
   checkLogin();
@@ -1473,7 +1473,7 @@ textarea { resize: vertical; min-height: 160px; }
   const DEFAULT = {
     consultants: ['Moses 목사님', '스태프 A', '스태프 B'],
     channels: ['유튜브', '인스타그램', '카카오톡', '네이버 검색', '지인 소개', '교회 연결', '페이스북'],
-    kcpa: ['KCPA 멤버1','KCPA 멤버2','KCPA 멤버3','KCPA 멤버4','KCPA 멤버5'],
+    kcpa: ['상담실장1','상담실장2','상담실장3','상담실장4','상담실장5'],
     academy: ['학원1','학원2','학원3','학원4','학원5']
   };
 
@@ -2613,7 +2613,7 @@ textarea { resize: vertical; min-height: 160px; }
     try {
       const {data, error} = await sb.from('first_consultations').select('*').order('created_at', {ascending:false});
       if (error) throw error;
-      if (Array.isArray(data) && data.length) {
+      if (Array.isArray(data)) {
         firstRecords = data.map(r => ({
           id: r.id,
           name: (r.name_ko || '') + (r.name_en ? ' (' + r.name_en + ')' : ''),
@@ -2633,10 +2633,11 @@ textarea { resize: vertical; min-height: 160px; }
         })).filter(r => r.name);
         localStorage.setItem('firstConsultations', JSON.stringify(firstRecords));
         updateFirstBadge();
-        const fp = document.getElementById('firstPanel');
-        if (fp && !fp.classList.contains('hidden')) renderFirstRecords();
       }
     } catch(e) { console.log('first consultations load error', e); }
+    // 0건이거나 에러여도 스피너가 멈추지 않도록 항상 다시 그린다.
+    const fp = document.getElementById('firstPanel');
+    if (fp && !fp.classList.contains('hidden')) renderFirstRecords();
   }
 
   function renderFirstRecords() {
