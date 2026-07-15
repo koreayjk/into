@@ -400,6 +400,8 @@
   const SUPA_URL = 'https://illbgsjvhsciougzjgwn.supabase.co';
   const SUPA_KEY = 'sb_publishable_EmIn4ZpTksxxbq7vXWTk4w_Wc38j9yH';
   const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  // 모든 기기가 공유하는 공용 설정 행의 키. user_id 가 uuid 타입이라 고정 UUID 를 쓴다.
+  const SHARED_ID = '00000000-0000-0000-0000-000000000000';
 
   // Default data
   const DEFAULT = {
@@ -432,8 +434,8 @@
 
   async function loadFromSheets() {
     try {
-      // 공용 설정 행 'shared' 를 읽는다 (모든 페이지·기기 공통)
-      let {data: settings} = await sb.from('cons_admin_settings').select('*').eq('user_id', 'shared').single();
+      // 공용 설정 행을 읽는다 (모든 페이지·기기 공통). user_id 컬럼이 uuid 타입이라 고정 UUID 를 키로 쓴다.
+      let {data: settings} = await sb.from('cons_admin_settings').select('*').eq('user_id', SHARED_ID).single();
       // 공용 행이 아직 없으면 로그인 사용자 본인 행을 시도 (기존 데이터 호환)
       if (!settings) {
         const {data:{session}} = await sb.auth.getSession();
@@ -563,7 +565,7 @@
       };
       // 공용 설정 행 (cons.html / cons1.html 이 그대로 읽어감)
       const shared = await sb.from('cons_admin_settings').upsert(
-        { user_id: 'shared', ...payload }, { onConflict: 'user_id' }
+        { user_id: SHARED_ID, ...payload }, { onConflict: 'user_id' }
       );
       remoteOk = !shared.error;
       if (shared.error) console.log('shared save error', shared.error);
